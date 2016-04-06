@@ -1,5 +1,5 @@
 body {
-    color: #cccccc;
+    color: #888888;
     background: #ffffff;
 }
 
@@ -7,6 +7,10 @@ span#mainTitle {
     font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
     font-weight: 100;
     font-size: 40pt;
+}
+
+.ultrabold {
+    font-weight: 700;
 }
 
 h1 {
