@@ -14,3 +14,7 @@ Coming soon...
 ## RESTful interface
 
 Coming soon
+
+### License
+
+The course code for the symbionts.org website is provided under the MIT license.
