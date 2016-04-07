@@ -1,10 +1,7 @@
 <html>
     <head>
         <title>symbiont</title>
-        <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css' />
-        <link rel='stylesheet' href="{{ url_for('static', filename='styles/symbionts.css') }}" />
-        <script src="{{ url_for('static', filename='scripts/datalookup.js') }}"></script>
-        <script src="{{ url_for('static', filename='scripts/jquery-1.12.2.min.js') }}"></script>
+        {% include 'head.html' %}
         <script>
             $(document).ready(function() {
                 updateSeqData($('seqData'), "CWO_RS00040");
@@ -16,12 +13,8 @@
     </head>
     <body>
         <div id="allContent">
-            <div id="heading">
-                <span id="mainTitle"><span class="ultrabold">symbiont</span>.org</span>
-            </div>
-            <div id="leftMenu">
-                <h1>menu</h1>
-            </div>
+            {% include 'header.html' %}
+            {% include 'menu.html' %}
             <div id="mainContent">
                 <h1>Gene details for CWO_RS00040 from <i>B. aphidicola</i></h1>
                 <div>
@@ -49,6 +42,7 @@
                     </div>
                 </div>
             </div>
+            {% include 'footer.html' %}
         </div>
     </body>
 </html>

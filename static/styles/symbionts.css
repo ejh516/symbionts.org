@@ -9,6 +9,12 @@ span#mainTitle {
     font-size: 40pt;
 }
 
+span#copyright {
+    font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-weight: 100;
+    font-size: 8pt;
+}
+
 .ultrabold {
     font-weight: 700;
 }
@@ -38,4 +44,8 @@ div#leftMenu {
 div#mainContent {
     width: 950px;
     float: right;
+}
+
+div#footer {
+    clear: both;
 }
