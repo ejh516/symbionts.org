@@ -10,6 +10,7 @@ import os
 
 app = Flask(__name__)
 m_connection = MongoClient()
+db = m_connection.symbiont
 
 #
 #  Routes listed in this section implement the basic web pages for the site (index, search results, gene pages, etc.)
@@ -18,8 +19,9 @@ m_connection = MongoClient()
 # Home page
 @app.route("/")
 def hello():
-    
-    return render_template("index.html")
+    genome_collection = db.genome
+    genomes = [rec for rec in genome_collection.find({'replicon_type': 'chromosome'}, {'organism': 1})]
+    return render_template("index.html", species=genomes)
 
 # Gene details page
 @app.route("/genedetails")
