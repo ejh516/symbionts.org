@@ -9,6 +9,7 @@ import os
 # Create the Flask app object that will be imported by the wsgi file
 
 app = Flask(__name__)
+m_connection = MongoClient()
 
 #
 #  Routes listed in this section implement the basic web pages for the site (index, search results, gene pages, etc.)
@@ -17,6 +18,7 @@ app = Flask(__name__)
 # Home page
 @app.route("/")
 def hello():
+    
     return render_template("index.html")
 
 # Gene details page

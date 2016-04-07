@@ -31,6 +31,10 @@ h2 {
     font-size: 20pt;
 }
 
+a {
+    color: #888888;
+}
+
 div#allContent {
     width: 1200px;
     margin: auto;
@@ -39,6 +43,30 @@ div#allContent {
 div#leftMenu {
     width: 250px;
     float: left;
+}
+
+div#leftMenu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+div#leftMenu ul li {
+    font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-weight: 300;
+    font-size: 16pt;
+}
+
+div#leftMenu ul li a:link {
+    text-decoration: none;
+}
+
+div#leftMenu ul li a:visited {
+    text-decoration: none;
+}
+
+div#leftMenu ul li a:hover {
+    font-weight: 700;
 }
 
 div#mainContent {
