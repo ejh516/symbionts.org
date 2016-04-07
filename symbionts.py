@@ -21,7 +21,27 @@ db = m_connection.symbiont
 def hello():
     genome_collection = db.genome
     genomes = [rec for rec in genome_collection.find({'replicon_type': 'chromosome'}, {'organism': 1})]
+    genomes.sort(key=lambda k: k['organism'])
     return render_template("index.html", species=genomes)
+
+# Search/search results page
+@app.route("/search")
+def search_page():
+    pass
+
+@app.route("/genomes")
+def genomes():
+    pass
+
+# Contact page
+@app.route("/contact")
+def contacts():
+    pass
+
+# Help page
+@app.route("/help")
+def help():
+    pass
 
 # Gene details page
 @app.route("/genedetails")
