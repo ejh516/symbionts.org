@@ -13,9 +13,27 @@
             {% include 'menu.html' %}
             <div id='mainContent'>
                 <h1>Search</h1>
-                <form>
-
+                <form action="/search" method='POST'>
+                    <input id='search_text' name='search_text' size=60 value="{{ search_text }}" />
+                    <input type='submit' text="search"/>
+                    <br />
+                    <select name='genome'>
+                        {% if genome == 'all' or genome == '' %}
+                             <option value='all' selected>All Species</option>
+                        {% else %}
+                             <option value='all'>All Species</option>
+                        {% endif %}
+                        {% for g in species %}
+                          {% if genome == g._id %}
+                            <option value="{{ g._id }}" selected>{{ g.organism }}</option>
+                          {% else %}
+                            <option value="{{ g._id }}">{{ g.organism }}</option>
+                          {% endif %}
+                        {% endfor %}
+                    </select>
                 </form>
+                <div id='search_results'>
+                </div>
             </div>
             {% include 'footer.html' %}
         </div>
