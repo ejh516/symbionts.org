@@ -35,7 +35,13 @@ h2 {
 
 a {
     color: #888888;
+    text-decoration: none;
 }
+
+a:hover {
+    font-weight: 700;
+}
+
 
 div#allContent {
     width: 1200px;
@@ -57,18 +63,6 @@ div#leftMenu ul li {
     font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
     font-weight: 300;
     font-size: 16pt;
-}
-
-div#leftMenu ul li a:link {
-    text-decoration: none;
-}
-
-div#leftMenu ul li a:visited {
-    text-decoration: none;
-}
-
-div#leftMenu ul li a:hover {
-    font-weight: 700;
 }
 
 div#mainContent {

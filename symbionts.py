@@ -1,6 +1,6 @@
 from __future__ import print_function, division
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from pymongo import MongoClient
 
 import sys
@@ -13,21 +13,28 @@ m_connection = MongoClient()
 db = m_connection.symbiont
 
 #
-#  Routes listed in this section implement the basic web pages for the site (index, search results, gene pages, etc.)
+# Routes listed in this section implement the basic web pages for the site 
+# (index, search results, gene pages, etc.)
 #
 
 # Home page
 @app.route("/")
 def hello():
     genome_collection = db.genome
-    genomes = [rec for rec in genome_collection.find({'replicon_type': 'chromosome'}, {'organism': 1})]
+    genome_cursor = db.genome.find({'replicon_type': 'chromosome'}, {'organism': 1})
+    genomes = [rec for rec in genome_cursor]
     genomes.sort(key=lambda k: k['organism'])
     return render_template("index.html", species=genomes)
 
 # Search/search results page
-@app.route("/search")
+@app.route("/search", methods=['POST', 'GET'])
 def search_page():
-    pass
+    if request.method == "POST":
+        return render_template("search.html", 
+                                genome=request.form['genome'], 
+                                search_text=request.form['search_text'])
+    else:
+        return render_template("search.html", genome="", search_text="")
 
 @app.route("/genomes")
 def genomes():
@@ -50,7 +57,8 @@ def gene_details():
 
 #
 #
-#  Routes listed below provide the RESTful interface to the MongoDB database which contains the genome data
+# Routes listed below provide the RESTful interface to the MongoDB database which 
+# contains the genome data
 #
 #
 
