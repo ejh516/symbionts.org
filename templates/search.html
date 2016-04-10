@@ -4,7 +4,20 @@
         {% include 'head.html' %}
         <script type='text/javascript'>
             $(document).ready(function () {
+            // TODO: only search at this point if the search string is not empty
+                {% if search_text != "" %}
+                    doSearch("{{ genome }}", "{{ search_text }}")
+                {% endif %}
             })
+
+            function doSearch(organism, search_text) {
+                alert("Doing search:\nOrganism: " + organism + "\nSearch text: " + search_text);
+                var title = "<h2>Results for " + search_text
+                if (organism != "all") {
+                    title = title + " in " + organism
+                }
+                $("#search_results").html(title)
+            }
         </script>
     </head>
     <body>
