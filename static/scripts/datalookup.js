@@ -10,3 +10,6 @@ function updateHomologues(div, geneID) {
 
 function updateSNPs(div, geneID) {
 }
+
+function update_search_results() {
+}

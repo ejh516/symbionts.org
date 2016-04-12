@@ -20,13 +20,13 @@ db = m_connection.symbiont
 # Home page
 @app.route("/")
 def hello():
-    all_species = get_genome_list()
+    all_species = get_species_list()
     return render_template("index.html", species=all_species)
 
 # Search/search results page
 @app.route("/search", methods=['POST', 'GET'])
 def search_page():
-    all_species = get_genome_list()
+    all_species = get_species_list()
     if request.method == "POST":
         return render_template("search.html", 
                                 genome=request.form['genome'], 
@@ -68,21 +68,26 @@ def gene_details():
 def getGeneData(genome, geneID):
     return jsonify({'genome': genome, 'geneID': geneID})
 
+@app.route("/search_all/<genome>/<search_text>")
+def full_text_search(genome, search_text):
+    results = {}
+    return jsonify(results)
+
 #
 #
 # Helper functions to execute common queries on the database
 #
 #
 
-def get_genome_list():
+def get_species_list():
     genome_collection = db.genome
-    genome_cursor = db.genome.find({'replicon_type': 'chromosome'}, {'organism': 1})
-    genomes = [rec for rec in genome_cursor]
-    genomes.sort(key=lambda k: k['organism'])
-    return genomes
+    species_cursor = db.genome.find({'replicon_type': 'chromosome'}, {'organism': 1})
+    species = [rec for rec in species_cursor]
+    species.sort(key=lambda k: k['organism'])
+    return species
 
-# If we are not running as part of mod_wsgi, create a Flask web server (at http://localhost:5000)
-# to test the code
+# If we are not running as part of mod_wsgi, create a Flask web server running in debug mode
+# (at http://localhost:5000) to test the code
 
 if __name__ == "__main__":
     app.debug = True

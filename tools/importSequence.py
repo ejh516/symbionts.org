@@ -158,6 +158,9 @@ if len(plasmid_ids) > 0:
 # Make sure that the genomes and genome.features collections are properly indexed
 
 genome_indices = genomes.index_information().keys()
+feature_indices = features.index_index_information.keys()
+
 if 'species' not in genome_indices:
     genomes.create_index([("organism",1)], name='species')
-
+if 'full_text' not in feature_indices:
+    features.create_index({"$**": 'text'}, name='full_text')
