@@ -11,11 +11,11 @@
             })
 
             function doSearch(organism, search_text) {
-                alert("Doing search:\nOrganism: " + organism + "\nSearch text: " + search_text);
                 var title = "<h2>Results for \"" + search_text + "\""
                 if (organism != "all") {
                     title = title + " in " + organism
                 }
+                title = title + "</h2>"
                 $("#search_results").html(title)
             }
         </script>
