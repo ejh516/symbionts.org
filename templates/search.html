@@ -15,8 +15,9 @@
                 if (organism != "all") {
                     title = title + " in " + organism
                 }
-                title = title + "</h2>"
-                $("#search_results").html(title)
+                title = title + "</h2><br />"
+                imagediv = "<div align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>"
+                $("#search_results").html(title + imagediv)
             }
         </script>
     </head>
