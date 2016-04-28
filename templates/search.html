@@ -17,7 +17,11 @@
                 title = title + "</h2><br />"
                 imagediv = "<div align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>"
                 $("#search_results").html(title + imagediv)
-                $.ajax(url="/search_all/" + organism + "/" + search_text)
+                $.ajax({
+                        "url": "/search_all/" + organism + "/" + search_text, 
+                        "success": format_search_results,
+                        "dataType": 'json'
+                       })
             }
         </script>
     </head>
