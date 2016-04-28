@@ -11,6 +11,7 @@ function updateHomologues(div, geneID) {
 function updateSNPs(div, geneID) {
 }
 
-function format_search_results(result, text_status, jqXHR) {
+function format_search_results(result, text_status, jqXHR, target_div) {
     alert(text_status);
+    alert(result['genome'])
 }

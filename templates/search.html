@@ -5,21 +5,32 @@
         <script type='text/javascript'>
             $(document).ready(function () {
                 {% if search_text != "" %}
-                    doSearch("{{ genome }}", "{{ search_text }}")
+                    doSearch("{{ genome }}", "{{ search_text }}");
                 {% endif %}
             })
 
             function doSearch(organism, search_text) {
                 var title = "<h2>Results for \"" + search_text + "\""
                 if (organism != "all") {
-                    title = title + " in " + organism
+                    var species_name = "";
+                    {% for g in species %}
+                        {% if g._id == genome %}
+                            species_name = "{{ g.organism }}";
+                        {% endif %}
+                    {% endfor %}
+                    if (species_name == "") {
+                        species_name = organism;
+                    }
+                    title = title + " in " + species_name;
                 }
-                title = title + "</h2><br />"
-                imagediv = "<div align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>"
-                $("#search_results").html(title + imagediv)
+                title = title + "</h2><br />";
+                imagediv = "<div align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
+                $("#search_results").html(title + imagediv);
                 $.ajax({
                         "url": "/search_all/" + organism + "/" + search_text, 
-                        "success": format_search_results,
+                        "success": function(data, status_text, jqXHR) {
+                            format_search_results(data, status_text, jqXHR, $('#search_results'));
+                        },
                         "dataType": 'json'
                        })
             }

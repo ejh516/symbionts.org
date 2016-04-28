@@ -72,19 +72,32 @@ def getGeneData(genome, geneID):
 @app.route("/search_all/<genome>/<search_text>")
 def full_text_search(genome, search_text):
 
-    results = {'hit_count': 0, 'results': []}
+# Set up a default structure to return if the search fails
+
+    results = {'hit_count': 0, 'results': [], 'search': search_text, 'genome': genome}
     features = db['genome.features']
+
+# Set the default search filter to just be the search text
+
     search_term = {"$text": {"$search": search_text}}
+
+# If the user selected a species from the drop-down, add that to the filter
+
     if genome != 'all':
         search_term['genome'] = genome
     features_cursor = features.find(search_term)
 
-    raw_results = []
-    for result in features_cursor:
-        result["_id"] = str(result['_id'])
-        raw_results.append(result)
-    results['hit_count'] = len(raw_results)
-    results['results'] = raw_results
+# Have a look through the results (if any were retrieved)
+
+    results['hit_count'] = features_cursor.count()
+
+    if results['hit_count'] > 0:
+        raw_results = []
+        for result in features_cursor:
+            result["_id"] = str(result['_id'])
+            raw_results.append(result)
+        results['results'] = raw_results
+
     return jsonify(results)
 
 #
