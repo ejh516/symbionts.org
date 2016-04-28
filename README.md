@@ -44,9 +44,16 @@ file to add the location of the software into the Python search path.
 
 ## Importing Data
 
-Genbank and EMBL rich, annotated sequence files can be loaded into the database using the importSequence.py 
-script in the tools folder.  By default, the data will be imported into the MongoDB instance that is running
-on the default port, and into a database called "symbiont" and a 
+Genbank and EMBL rich, annotated sequence files can be loaded into the database using 
+the `importSequence.py` script in the tools folder.  
+By default, the data will be imported into the MongoDB instance that is running
+on the default port, and into a database called "symbiont".  
+The genome sequence and metadata will
+be stored in the "genome" collection and 
+data on genes and other sequence features in the "genome.features" collection. 
+Genome IDs (as specified in the sequence file) must be unique.  
+If the file contains multiple sequences, the first is assumed to be the genome, and 
+subsequent sequences are treated as associated plasmids.
 
 ## Web interface
 
