@@ -70,7 +70,20 @@ def getGeneData(genome, geneID):
 
 @app.route("/search_all/<genome>/<search_text>")
 def full_text_search(genome, search_text):
-    results = {}
+
+    results = {'hit_count': 0, 'results': []}
+    features = db['genome.features']
+    search_term = {"$text": {"$search": search_text}}
+    if genome != 'all':
+        search_term['genome'] = genome
+    features_cursor = features.find(search_term)
+
+    raw_results = []
+    for result in features_cursor:
+        result["_id"] = str(result['_id'])
+        raw_results.append(result)
+    results['hit_count'] = len(raw_results)
+    results['results'] = raw_results
     return jsonify(results)
 
 #

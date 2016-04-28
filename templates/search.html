@@ -4,7 +4,6 @@
         {% include 'head.html' %}
         <script type='text/javascript'>
             $(document).ready(function () {
-            // TODO: only search at this point if the search string is not empty
                 {% if search_text != "" %}
                     doSearch("{{ genome }}", "{{ search_text }}")
                 {% endif %}
@@ -18,6 +17,7 @@
                 title = title + "</h2><br />"
                 imagediv = "<div align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>"
                 $("#search_results").html(title + imagediv)
+                $.ajax(url="/search_all/" + organism + "/" + search_text)
             }
         </script>
     </head>
