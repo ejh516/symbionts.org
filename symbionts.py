@@ -75,7 +75,7 @@ def full_text_search(genome, search_text):
 # Set up a default structure to return if the search fails
 
     results = {'hit_count': 0, 'results': [], 'search': search_text, 'genome': genome}
-    features = db['genome.features']
+    features = db.genome.features
 
 # Set the default search filter to just be the search text
 
@@ -99,6 +99,10 @@ def full_text_search(genome, search_text):
         results['results'] = raw_results
 
     return jsonify(results)
+
+@app.route("/gene/<gene_id>")
+def get_gene_by_ID(gene_id):
+    return jsonify({"id": gene_id})
 
 #
 #

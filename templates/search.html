@@ -11,26 +11,23 @@
 
             function doSearch(organism, search_text) {
                 var title = "<h2>Results for \"" + search_text + "\""
+                var all_species = {};
+                {% for g in species %}
+                    all_species["{{ g._id }}"] = "{{ g.organism }}";
+                {% endfor %}
                 if (organism != "all") {
-                    var species_name = "";
-                    {% for g in species %}
-                        {% if g._id == genome %}
-                            species_name = "{{ g.organism }}";
-                        {% endif %}
-                    {% endfor %}
-                    if (species_name == "") {
-                        species_name = organism;
-                    }
+                    var species_name = all_species[organism];
                     title = title + " in " + species_name;
                 }
-                title = title + "</h2><br />";
-                imagediv = "<div align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
+                title = title + "</h2>";
+                imagediv = "<div id=\"spinning_wheel_div\" align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
                 $("#search_results").html(title + imagediv);
                 $.ajax({
                         "url": "/search_all/" + organism + "/" + search_text, 
                         "success": function(data, status_text, jqXHR) {
-                            format_search_results(data, status_text, jqXHR, $('#search_results'));
-                        },
+                                            format_search_results(data, status_text, jqXHR, 
+                                                $('#search_results'), all_species);
+                                   },
                         "dataType": 'json'
                        })
             }

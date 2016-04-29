@@ -33,6 +33,12 @@ h2 {
     font-size: 20pt;
 }
 
+h3 {
+    font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-weight: 100;
+    font-size: 16pt;
+}
+
 a {
     color: #888888;
     text-decoration: none;
