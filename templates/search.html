@@ -5,11 +5,11 @@
         <script type='text/javascript'>
             $(document).ready(function () {
                 {% if search_text != "" %}
-                    doSearch("{{ genome }}", "{{ search_text }}");
+                    doSearch("{{ genome }}", "{{ search_text }}", $('#search_results'));
                 {% endif %}
             })
 
-            function doSearch(organism, search_text) {
+            function doSearch(organism, search_text, target_div) {
                 var title = "<h2>Results for \"" + search_text + "\""
                 var all_species = {};
                 {% for g in species %}
@@ -21,12 +21,12 @@
                 }
                 title = title + "</h2>";
                 imagediv = "<div id=\"spinning_wheel_div\" align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
-                $("#search_results").html(title + imagediv);
+                target_div.html(title + imagediv);
                 $.ajax({
                         "url": "/search_all/" + organism + "/" + search_text, 
                         "success": function(data, status_text, jqXHR) {
                                             format_search_results(data, status_text, jqXHR, 
-                                                $('#search_results'), all_species);
+                                                target_div, all_species);
                                    },
                         "dataType": 'json'
                        })

@@ -78,3 +78,27 @@ div#mainContent {
 div#footer {
     clear: both;
 }
+
+table {
+    border: none;
+}
+
+table td {
+    margin: 0px;
+    padding: 10px;
+}
+
+table tr:nth-child(odd) td {
+    background-color: #eeeeee;
+}
+
+div#search_results table {
+    font-weight: 100;
+}
+
+div#search_results table th {
+    font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-weight: 100;
+    font-style: italic;
+    font-size: 14pt;
+}
