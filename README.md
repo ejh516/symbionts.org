@@ -15,7 +15,7 @@ The following software need to be installed on your system:
 * MongoDB
 * Python modules:
   * Flask
-  * pymongo
+  * pymongo (include bson module, don't install bson using pip or easy_install!!)
   * biopython (only required to import data)
 * BLAST+ from [NCBI](http://www.ncbi.nlm.nih.gov) (only required to generate BLAST matches between genomes)
 
