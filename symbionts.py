@@ -21,13 +21,13 @@ db = m_connection.symbiont
 # Home page
 @app.route("/")
 def hello():
-    all_species = get_species_list()
+    all_species = get_species_list();
     return render_template("index.html", species=all_species)
 
 # Search/search results page
 @app.route("/search", methods=['POST', 'GET'])
 def search_page():
-    all_species = get_species_list()
+    all_species = get_species_list();
     if request.method == "POST":
         return render_template("search.html", 
                                 genome=request.form['genome'], 
@@ -54,15 +54,14 @@ def help():
     pass
 
 # Gene details page
-@app.route("/genedetails")
-def gene_details():
-    return render_template("genepage.html")
+@app.route("/genedetails/<gene_id>")
+def gene_details(gene_id):
+    all_species = get_species_list();
+    return render_template("genedetails.html", id=gene_id, species=all_species)
 
-#
 #
 # Routes listed below provide the RESTful interface to the MongoDB database which 
 # contains the genome data
-#
 #
 
 @app.route("/gene/<genome>/<geneID>")
@@ -102,12 +101,19 @@ def full_text_search(genome, search_text):
 
 @app.route("/gene/<gene_id>")
 def get_gene_by_ID(gene_id):
-    return jsonify({"id": gene_id})
+# TODO: retrieve the feature details, replicon and genomes from MongoDB
+    oid = ObjectId(gene_id)
+    feature_collection = db.genome.features
+    gene_details = feature_collection.find_one({"_id": oid})
+    gene_details['_id'] = str(gene_details['_id'])
+    replicon_details = db.genome.find_one({"_id": gene_details['genome']}, {"sequence": 0})
+    genome_details = None
+    if replicon_details['replicon_type'] == "plasmid":
+        genome_details = db.genome.find_one({"_id": replicon_details['genome']}, {"sequence": 0})
+    return jsonify({"feature": gene_details, "replicon": replicon_details, "genome": genome_details});
 
 #
-#
 # Helper functions to execute common queries on the database
-#
 #
 
 def get_species_list():

@@ -24,29 +24,33 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
 
     $("#spinning_wheel_div").remove();
     target_div.append("<h3>" + result.hit_count + " features found</h3>");
-    target_div.append("<table><thead>" + header_row + 
-                        "</thead><tbody id=\"results_table\"></tbody></table>");
 
-// Get a reference to the body of the table, then append a row for each result
+    if (result.hit_count > 0) {
 
-    var table = $('#results_table');
-    for (var i=0; i < result.results.length; i++) {
-        feature = result.results[i];
-        var row_cells = "<td>" + feature.locus_tag + "</td>";
-        if (feature.hasOwnProperty('gene')) {
-            row_cells = row_cells + "<td>" + feature.gene + "</td>";
-        } else {
-            row_cells = row_cells + "<td></td>";
+        target_div.append("<table><thead>" + header_row + 
+                            "</thead><tbody id=\"results_table\"></tbody></table>");
+
+    // Get a reference to the body of the table, then append a row for each result
+
+        var table = $('#results_table');
+        for (var i=0; i < result.results.length; i++) {
+            feature = result.results[i];
+            var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag + "</a></td>";
+            if (feature.hasOwnProperty('gene')) {
+                row_cells = row_cells + "<td>" + feature.gene + "</td>";
+            } else {
+                row_cells = row_cells + "<td></td>";
+            }
+            row_cells = row_cells + "<td>" + feature.type + "</td>"
+            if (result.genome == 'all') {
+                row_cells = row_cells + "<td>" + all_species[feature.genome] + "</td>";
+            }
+            if (feature.hasOwnProperty('product')) {
+                row_cells = row_cells + "<td>" + feature.product + "</td>";
+            } else {
+                row_cells = row_cells + "<td></td>";
+            }
+            table.append("<tr>" + row_cells + "</tr>");
         }
-        row_cells = row_cells + "<td>" + feature.type + "</td>"
-        if (result.genome == 'all') {
-            row_cells = row_cells + "<td>" + all_species[feature.genome] + "</td>";
-        }
-        if (feature.hasOwnProperty('product')) {
-            row_cells = row_cells + "<td>" + feature.product + "</td>";
-        } else {
-            row_cells = row_cells + "<td></td>";
-        }
-        table.append("<tr>" + row_cells + "</tr>");
     }
 }
