@@ -7,10 +7,10 @@
                 {% if search_text != "" %}
                     doSearch("{{ genome }}", "{{ search_text }}", $('#search_results'));
                 {% endif %}
-            })
+            });
 
             function doSearch(organism, search_text, target_div) {
-                var title = "<h2>Results for \"" + search_text + "\""
+                var title = "<h2>Results for \"" + search_text + "\"";
                 var all_species = {};
                 {% for g in species %}
                     all_species["{{ g._id }}"] = "{{ g.organism }}";
@@ -29,7 +29,7 @@
                                                 target_div, all_species);
                                    },
                         "dataType": 'json'
-                       })
+                       });
             }
         </script>
     </head>

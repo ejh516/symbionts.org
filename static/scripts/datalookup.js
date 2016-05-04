@@ -1,16 +1,3 @@
-function updateSeqData(div, geneID) {
-}
-
-function updateGenomicContext(div, geneID) {
-}
-
-function updateHomologues(div, geneID) {
-
-}
-
-function updateSNPs(div, geneID) {
-}
-
 function format_search_results(result, text_status, jqXHR, target_div, all_species) {
 
     var header_row = "";
@@ -43,6 +30,7 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
             }
             row_cells = row_cells + "<td>" + feature.type + "</td>"
             if (result.genome == 'all') {
+                var species_name = format_species_name(all_species[feature.genome]);
                 row_cells = row_cells + "<td>" + all_species[feature.genome] + "</td>";
             }
             if (feature.hasOwnProperty('product')) {
@@ -51,6 +39,19 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
                 row_cells = row_cells + "<td></td>";
             }
             table.append("<tr>" + row_cells + "</tr>");
+        }
+    }
+}
+
+function format_gene_data(results, text_status, jqXHR, target_div, all_species) {
+
+}
+
+function format_species_name(species) {
+    var words = species.split(" ");
+    if (words.length > 1) {
+        species = "<i>" + words[0] + " " + words[1] + "</i>";
+        for (i = 2; i < words.length; i++) {
         }
     }
 }
