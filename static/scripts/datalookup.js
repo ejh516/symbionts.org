@@ -4,7 +4,7 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
     if (result.genome == 'all') {
         header_row = "<tr><th>Locus</th><th>Name</th><th>Type</th><th>Species</th><th>Product</th></tr>";
     } else {
-    header_row = "<tr><th>Locus</th><th>Name</th><th>Type</th><th>Product</th></tr>";
+        header_row = "<tr><th>Locus</th><th>Name</th><th>Type</th><th>Product</th></tr>";
     }
 
 // Replace the current contents of the div with a heading, then append an empty table
@@ -31,7 +31,7 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
             row_cells = row_cells + "<td>" + feature.type + "</td>"
             if (result.genome == 'all') {
                 var species_name = format_species_name(all_species[feature.genome]);
-                row_cells = row_cells + "<td>" + all_species[feature.genome] + "</td>";
+                row_cells = row_cells + "<td>" + species_name + "</td>";
             }
             if (feature.hasOwnProperty('product')) {
                 row_cells = row_cells + "<td>" + feature.product + "</td>";
@@ -52,6 +52,8 @@ function format_species_name(species) {
     if (words.length > 1) {
         species = "<i>" + words[0] + " " + words[1] + "</i>";
         for (i = 2; i < words.length; i++) {
+            species = species + " " + words[i];
         }
     }
+    return species
 }

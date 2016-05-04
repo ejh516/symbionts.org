@@ -16,7 +16,7 @@
                     all_species["{{ g._id }}"] = "{{ g.organism }}";
                 {% endfor %}
                 if (organism != "all") {
-                    var species_name = all_species[organism];
+                    var species_name = format_species_name(all_species[organism]);
                     title = title + " in " + species_name;
                 }
                 title = title + "</h2>";
