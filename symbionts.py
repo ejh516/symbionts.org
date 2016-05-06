@@ -118,6 +118,7 @@ def get_genome_info():
     
     results = {}
     genome = db.genome
+    features = db.genome.features
 
 # Get genome data 
 
@@ -130,6 +131,15 @@ def get_genome_info():
     if results ['hit_count'] > 0:
         raw_results = []
         for result in genome_cursor:
+            #for each genome, count the number of genes in the features collection
+            gene_cursor = features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]})
+            result["numGenes"]= gene_cursor.count()
+            #for each genome, count the number of CDSs in the features collection
+            cds_cursor = features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]})
+            result["numCDSs"]= cds_cursor.count()
+            #for each genome, count the number of pseudogenes in the features collection
+            pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': result["_id"]})
+            result["numPseudogenes"]= pseudo_cursor.count()
             raw_results.append(result)
    
         results['results'] = raw_results

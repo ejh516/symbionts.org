@@ -60,7 +60,7 @@ function format_species_name(species) {
 
 function format_genome_results(result, text_status, jqXHR, target_div) {
 
-    var header_row = "<tr><th>Genome ID</th><th>Organism</th><th>Taxonomy</th><th>No. Plasmids</th></tr>";
+    var header_row = "<tr><th>Genome ID</th><th>Organism</th><th>Taxonomy</th><th>No. Plasmids</th><th>No. Genes</th><th>No. CDSs</th><th>No. Pseudogenes</th></tr>";
 
     $("#spinning_wheel_div").remove();
      target_div.append("<h3>" + result.hit_count + " Genomes found</h3>");
@@ -81,9 +81,14 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
             } else {
                 row_cells = row_cells + "<td>0</td>";
             }
+
+            row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes + "</td>";
+
             table.append("<tr>" + row_cells + "</tr>");
+
+            //add extra rows for taxonomy results
             for (var j=1; j< genome.taxonomy.length-1; j++) {
-                table.append("<tr><td></td><td></td><td>" + genome.taxonomy[j] + "</td><td></td></tr>");
+                table.append("<tr><td></td><td></td><td>" + genome.taxonomy[j] + "</td><td></td><td></td><td></td><td></td></tr>");
             }
             
         }
