@@ -119,9 +119,9 @@ def get_genome_info():
     results = {}
     genome = db.genome
 
-# Get genome data (IDs only for now)
+# Get genome data 
 
-    genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1, 'organism':1})
+    genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1, 'organism':1, 'taxonomy':1})
 
 # Have a look through results 
 
@@ -130,8 +130,8 @@ def get_genome_info():
     if results ['hit_count'] > 0:
         raw_results = []
         for result in genome_cursor:
-            #result["_id"] = str(result['_id'])
             raw_results.append(result)
+   
         results['results'] = raw_results
 
     return jsonify(results)
