@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <title>Genomes symbionts.org</title>
+        {% include 'head.html' %}
+        <script type='text/javascript'>
+            $(document).ready(function () {
+               
+                    getGenomes($('#genome_search_results'));
+            
+            });
+
+            function getGenomes(target_div) {
+                var title = "<h2>Testing getting results for all genomes";
+                title = title + "</h2>";
+                imagediv = "<div id=\"spinning_wheel_div\" align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
+                target_div.html(title + imagediv);
+                $.ajax({
+                        "url": "/genome_info", 
+                        "success": function(data, status_text, jqXHR) {
+                                            format_genome_results(data, status_text, jqXHR, target_div);
+                                   },
+                        "dataType": 'json'
+                       });
+            }
+        </script>
+    </head>
+    <body>
+        <div id='allContent'>
+            {% include 'header.html' %}
+            {% include 'menu.html' %}
+            <div id='mainContent'>
+                <h1>Genomes</h1>
+                
+                <div id='genome_search_results'>
+                </div>
+            </div>
+            {% include 'footer.html' %}
+        </div>
+    </body>
+</html>

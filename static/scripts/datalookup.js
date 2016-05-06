@@ -57,3 +57,24 @@ function format_species_name(species) {
     }
     return species
 }
+
+function format_genome_results(result, text_status, jqXHR, target_div) {
+
+    var header_row = "<tr><th>Genome ID</th></tr>";
+
+    $("#spinning_wheel_div").remove();
+     target_div.append("<h3>" + result.hit_count + " Genomes found</h3>");
+
+    if (result.hit_count > 0) {
+        target_div.append("<table><thead>" + header_row + 
+                            "</thead><tbody id=\"results_table\"></tbody></table>");
+
+        var table = $('#results_table');
+
+        for (var i=0; i < result.results.length; i++) {
+            genome = result.results[i];
+            table.append("<tr><td>" + genome._id + "</td></tr>")
+            
+        }
+    }
+}

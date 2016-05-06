@@ -41,7 +41,8 @@ def search_page():
 
 @app.route("/genomes")
 def genomes():
-    pass
+    #pass
+    return render_template("genomes.html")
 
 # Contact page
 @app.route("/contact")
@@ -112,9 +113,32 @@ def get_gene_by_ID(gene_id):
         genome_details = db.genome.find_one({"_id": replicon_details['genome']}, {"sequence": 0})
     return jsonify({"feature": gene_details, "replicon": replicon_details, "genome": genome_details});
 
-#
-# Helper functions to execute common queries on the database
-#
+@app.route("/genome_info")
+def get_genome_info():
+    
+    results = {}
+    genome = db.genome
+
+# Get genome data (IDs only for now)
+
+    genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1})
+
+# Have a look through results 
+
+    results ['hit_count'] = genome_cursor.count()
+
+    if results ['hit_count'] > 0:
+        raw_results = []
+        for result in genome_cursor:
+            result["_id"] = str(result['_id'])
+            raw_results.append(result)
+        results['results'] = raw_results
+
+    return jsonify(results)
+
+
+#Helper functions to execute common queries on the database
+
 
 def get_species_list():
     genome_collection = db.genome
