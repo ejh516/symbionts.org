@@ -121,7 +121,7 @@ def get_genome_info():
 
 # Get genome data 
 
-    genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1, 'organism':1, 'taxonomy':1})
+    genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1, 'organism':1, 'taxonomy':1, 'plasmids':1})
 
 # Have a look through results 
 

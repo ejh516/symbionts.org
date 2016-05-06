@@ -60,7 +60,7 @@ function format_species_name(species) {
 
 function format_genome_results(result, text_status, jqXHR, target_div) {
 
-    var header_row = "<tr><th>Genome ID</th><th>Organism</th><th>Taxonomy</th></tr>";
+    var header_row = "<tr><th>Genome ID</th><th>Organism</th><th>Taxonomy</th><th>No. Plasmids</th></tr>";
 
     $("#spinning_wheel_div").remove();
      target_div.append("<h3>" + result.hit_count + " Genomes found</h3>");
@@ -73,9 +73,17 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
 
         for (var i=0; i < result.results.length; i++) {
             genome = result.results[i];
-            table.append("<tr><td>" + genome._id + "</td><td>" + genome.organism + "</td><td>" + genome.taxonomy[0] + "</td></tr>");
+
+            var row_cells = "<td>" + genome._id + "</td><td>" + genome.organism + "</td><td>" + genome.taxonomy[0] + "</td>";
+            if (genome.hasOwnProperty('plasmids'))
+            {
+                row_cells = row_cells + "<td>" + genome.plasmids.length + "</td>";
+            } else {
+                row_cells = row_cells + "<td>0</td>";
+            }
+            table.append("<tr>" + row_cells + "</tr>");
             for (var j=1; j< genome.taxonomy.length-1; j++) {
-                table.append("<tr><td></td><td></td><td>" + genome.taxonomy[j] + "</td></tr>");
+                table.append("<tr><td></td><td></td><td>" + genome.taxonomy[j] + "</td><td></td></tr>");
             }
             
         }
