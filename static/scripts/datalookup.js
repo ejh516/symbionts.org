@@ -75,7 +75,6 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
             genome = result.results[i];
             var formatted_species_name = format_species_name(genome.organism);
             var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td><td>" + formatted_species_name + "</td>";
-            //var row_cells = "<td>" + genome._id + "</td><td>" + formatted_species_name + "</td>";
             var tax = genome.taxonomy[0];
              for (var j=1; j< genome.taxonomy.length-1; j++) {
                  tax = tax + "</br>" + genome.taxonomy[j];
@@ -95,5 +94,15 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
             
             
         }
+    }
+}
+
+function format_genome_data(result, text_status, jqXHR, target_div) {
+
+    $("#spinning_wheel_div").remove();
+    target_div.append("<h3>Get some genome data hehehehe...</h3>");
+    //if(result.length>0)
+    {
+      target_div.append("<h3>" + result._id + "</h3>");  
     }
 }

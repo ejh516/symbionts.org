@@ -2,10 +2,26 @@
     <head>
         <title>symbionts.org Genome Details</title>
         {% include 'head.html' %}
-        <script>
+        <script type='text/javascript'>
             $(document).ready(function () {
-
+               
+                    getGenomeDetails("{{ id }}",$('#genome_details'));
+            
             });
+
+            function getGenomeDetails(genome_id,target_div) {
+                var title = "<h2>Testing getting genome details.";
+                title = title + "</h2>";
+                imagediv = "<div id=\"spinning_wheel_div\" align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
+                target_div.html(title + imagediv);
+                $.ajax({
+                        "url": "/genome_info/" + genome_id, 
+                        "success": function(data, status_text, jqXHR) {
+                                            format_genome_data(data, status_text, jqXHR, target_div);
+                                   },
+                        "dataType": 'json'
+                       });
+            }
         </script>
     </head>
     <body>
@@ -13,6 +29,9 @@
             {% include 'header.html' %}
             {% include 'menu.html' %}
             <div id='mainContent'>
+            
+            <div id='genome_details'>
+                </div>
             </div>
             {% include 'footer.html' %}
         </div>
