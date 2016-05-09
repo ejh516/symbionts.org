@@ -100,9 +100,10 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
 function format_genome_data(result, text_status, jqXHR, target_div) {
 
     $("#spinning_wheel_div").remove();
-    target_div.append("<h3>Get some genome data hehehehe...</h3>");
-    //if(result.length>0)
-    {
-      target_div.append("<h3>" + result._id + "</h3>");  
-    }
+    target_div.append("<h3>Get some genome data...</h3>");
+    target_div.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
+    var table = $('#results_table');
+    table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
+    table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    
 }
