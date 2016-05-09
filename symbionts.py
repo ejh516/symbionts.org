@@ -60,6 +60,11 @@ def gene_details(gene_id):
     all_species = get_species_list();
     return render_template("genedetails.html", id=gene_id, species=all_species)
 
+# Genome details page
+@app.route("/genomedetails/<genome_id>")
+def genome_details(genome_id):
+    return render_template("genomedetails.html", id=genome_id)
+
 #
 # Routes listed below provide the RESTful interface to the MongoDB database which 
 # contains the genome data
@@ -105,7 +110,7 @@ def get_gene_by_ID(gene_id):
 # TODO: retrieve the feature details, replicon and genomes from MongoDB
     oid = ObjectId(gene_id)
     feature_collection = db.genome.features
-    gene_details = feature_collection.find_one({"_id": oid})
+    gene_details = feature_collection.find_one
     gene_details['_id'] = str(gene_details['_id'])
     replicon_details = db.genome.find_one({"_id": gene_details['genome']}, {"sequence": 0})
     genome_details = None
@@ -145,6 +150,14 @@ def get_genome_info():
         results['results'] = raw_results
 
     return jsonify(results)
+
+@app.route("/genome_info/<genome_id>")
+def get_genome_by_ID(genome_id):
+    genome = db.genome
+    genome_details = genome.find_one({"_id": genome_id}, {"sequence":0})
+    #TO DO
+    return jsonify(genome_details)
+
 
 
 #Helper functions to execute common queries on the database

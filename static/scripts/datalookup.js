@@ -73,8 +73,15 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
 
         for (var i=0; i < result.results.length; i++) {
             genome = result.results[i];
-
-            var row_cells = "<td>" + genome._id + "</td><td>" + genome.organism + "</td><td>" + genome.taxonomy[0] + "</td>";
+            var formatted_species_name = format_species_name(genome.organism);
+            var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td><td>" + formatted_species_name + "</td>";
+            //var row_cells = "<td>" + genome._id + "</td><td>" + formatted_species_name + "</td>";
+            var tax = genome.taxonomy[0];
+             for (var j=1; j< genome.taxonomy.length-1; j++) {
+                 tax = tax + "</br>" + genome.taxonomy[j];
+             }
+             row_cells = row_cells + "<td>" + tax + "</td>";
+            
             if (genome.hasOwnProperty('plasmids'))
             {
                 row_cells = row_cells + "<td>" + genome.plasmids.length + "</td>";
@@ -85,11 +92,7 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
             row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes + "</td>";
 
             table.append("<tr>" + row_cells + "</tr>");
-
-            //add extra rows for taxonomy results
-            for (var j=1; j< genome.taxonomy.length-1; j++) {
-                table.append("<tr><td></td><td></td><td>" + genome.taxonomy[j] + "</td><td></td><td></td><td></td><td></td></tr>");
-            }
+            
             
         }
     }
