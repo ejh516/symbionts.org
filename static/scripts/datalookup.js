@@ -76,7 +76,7 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
             var formatted_species_name = format_species_name(genome.organism);
             var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td><td>" + formatted_species_name + "</td>";
             var tax = genome.taxonomy[0];
-             for (var j=1; j< genome.taxonomy.length-1; j++) {
+             for (var j=1; j< genome.taxonomy.length; j++) {
                  tax = tax + "</br>" + genome.taxonomy[j];
              }
              row_cells = row_cells + "<td>" + tax + "</td>";
@@ -106,7 +106,7 @@ function format_genome_data(result, text_status, jqXHR, target_div_details, targ
     table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
     table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
     var tax = result.taxonomy[0];
-    for (var j=1; j< result.taxonomy.length-1; j++) {
+    for (var j=1; j< result.taxonomy.length; j++) {
         tax = tax + "</br>" + result.taxonomy[j];
     }
     table.append("<tr><td> Taxonomy </td><td>" + tax + "</td></tr>");
@@ -121,14 +121,22 @@ function format_genome_data(result, text_status, jqXHR, target_div_details, targ
     table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
 
     target_div_references.append("<h3>References</h3>");
+    //target_div_references.append("<table><thead><tr><th>Authors</th></tr></thead><tbody id=\"results_table\"></tbody></table>");
     target_div_references.append("<table><thead><tbody id=\"ref_table\"></tbody></table>");
     var ref_table = $('#ref_table');
     if(result.hasOwnProperty('references'))
     {
-        for (var i=0; i < result.references.length; i++) {
-        ref_table.append("<tr><td> Authors </td><td> hello </td></tr>");
+        for (var j=0; j< result.references.length; j++) {
+             var ref = result.references[j].authors +". " +result.references[j].title + ". "+ result.references[j].journal;
+             if (result.references[j].hasOwnProperty('pubmed_id'))
+             {
+                ref = ref + ". PubMed ID: " + result.references[j].pubmed_id;
+             }
+             ref_table.append("<tr><td>" + ref + "</td></tr>")        
         }
+
     }
+
     
     
 }
