@@ -153,10 +153,20 @@ def get_genome_info():
 
 @app.route("/genome_info/<genome_id>")
 def get_genome_by_ID(genome_id):
+    results = {}
     genome = db.genome
-    genome_details = genome.find_one({"_id": genome_id}, {"sequence":0})
-    #TO DO
-    return jsonify(genome_details)
+    features = db.genome.features
+
+# Get data for given genome    
+    results = genome.find_one({"_id": genome_id}, {"sequence":0})
+    gene_cursor = features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id})
+    results["numGenes"]= gene_cursor.count()
+    cds_cursor = features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id})
+    results["numCDSs"]= cds_cursor.count()
+    pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': genome_id})
+    results["numPseudogenes"]= pseudo_cursor.count()
+
+    return jsonify(results)
 
 
 

@@ -97,13 +97,38 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
     }
 }
 
-function format_genome_data(result, text_status, jqXHR, target_div) {
+function format_genome_data(result, text_status, jqXHR, target_div_details, target_div_references) {
 
     $("#spinning_wheel_div").remove();
-    target_div.append("<h3>Get some genome data...</h3>");
-    target_div.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
+    target_div_details.append("<h3>Genome details</h3>");
+    target_div_details.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
     var table = $('#results_table');
     table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
     table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    var tax = result.taxonomy[0];
+    for (var j=1; j< result.taxonomy.length-1; j++) {
+        tax = tax + "</br>" + result.taxonomy[j];
+    }
+    table.append("<tr><td> Taxonomy </td><td>" + tax + "</td></tr>");
+    var numPlasmids = 0;
+    if (result.hasOwnProperty('plasmids'))
+    {
+        numPlasmids = result.plasmids.length;
+    } 
+    table.append("<tr><td> No. Plasmids </td><td>" + numPlasmids + "</td></tr>");
+    table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
+    table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
+    table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
+
+    target_div_references.append("<h3>References</h3>");
+    target_div_references.append("<table><thead><tbody id=\"ref_table\"></tbody></table>");
+    var ref_table = $('#ref_table');
+    if(result.hasOwnProperty('references'))
+    {
+        for (var i=0; i < result.references.length; i++) {
+        ref_table.append("<tr><td> Authors </td><td> hello </td></tr>");
+        }
+    }
+    
     
 }
