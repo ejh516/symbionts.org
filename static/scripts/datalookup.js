@@ -73,70 +73,155 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
 
         for (var i=0; i < result.results.length; i++) {
             genome = result.results[i];
-            var formatted_species_name = format_species_name(genome.organism);
-            var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td><td>" + formatted_species_name + "</td>";
-            var tax = genome.taxonomy[0];
-             for (var j=1; j< genome.taxonomy.length; j++) {
+            var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td>";
+
+            if ('organism' in genome)
+            {
+                row_cells = row_cells + "<td>" + format_species_name(genome.organism) + "</td>";
+            }
+            else
+            {
+              row_cells = row_cells + "<td> Not found.</td>";  
+            }
+
+            if ('taxonomy' in genome)
+            {
+                var tax = genome.taxonomy[0];
+                for (var j=1; j< genome.taxonomy.length; j++) {
                  tax = tax + "</br>" + genome.taxonomy[j];
-             }
-             row_cells = row_cells + "<td>" + tax + "</td>";
+                }
+                row_cells = row_cells + "<td>" + tax + "</td>";
+            }
+            else
+            {
+              row_cells = row_cells + "<td> Not found.</td>";  
+            } 
             
-            if (genome.hasOwnProperty('plasmids'))
+            if ('plasmids' in genome)
             {
                 row_cells = row_cells + "<td>" + genome.plasmids.length + "</td>";
-            } else {
+            } 
+            else 
+            {
                 row_cells = row_cells + "<td>0</td>";
             }
 
             row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes + "</td>";
-
             table.append("<tr>" + row_cells + "</tr>");
-            
-            
+                       
         }
     }
 }
 
 function format_genome_data(result, text_status, jqXHR, target_div_details, target_div_references) {
 
+    // Format table of genome details
     $("#spinning_wheel_div").remove();
     target_div_details.append("<h3>Genome details</h3>");
     target_div_details.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
     var table = $('#results_table');
     table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
-    table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
-    var tax = result.taxonomy[0];
-    for (var j=1; j< result.taxonomy.length; j++) {
-        tax = tax + "</br>" + result.taxonomy[j];
-    }
-    table.append("<tr><td> Taxonomy </td><td>" + tax + "</td></tr>");
-    var numPlasmids = 0;
-    if (result.hasOwnProperty('plasmids'))
+
+    if ('organism' in result)
     {
-        numPlasmids = result.plasmids.length;
+        table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    }
+
+    if ('taxonomy' in result)
+    {
+        var tax = result.taxonomy[0];
+        for (var j=1; j< result.taxonomy.length; j++) {
+            tax = tax + "</br>" + result.taxonomy[j];
+            }
+        table.append("<tr><td> Taxonomy </td><td>" + tax + "</td></tr>");
+    }
+
+  
+    if ('plasmids' in result)
+    {
+       var plasmids = "<a href=\"/plasmiddetails/" + result.plasmids[0] + "\">" + result.plasmids[0] + "</a>";
+        for (var j=1; j< result.plasmids.length; j++) {
+            plasmids = plasmids + "</br><a href=\"/plasmiddetails/" + result.plasmids[j] + "\">" + result.plasmids[j] + "</a>";
+        } 
     } 
-    table.append("<tr><td> No. Plasmids </td><td>" + numPlasmids + "</td></tr>");
+    else
+    {
+        var plasmids = "None";
+    }
+    table.append("<tr><td> Plasmids </td><td>" + plasmids + "</td></tr>");
     table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
     table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
     table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
 
+    // Format table of references
     target_div_references.append("<h3>References</h3>");
-    //target_div_references.append("<table><thead><tr><th>Authors</th></tr></thead><tbody id=\"results_table\"></tbody></table>");
     target_div_references.append("<table><thead><tbody id=\"ref_table\"></tbody></table>");
     var ref_table = $('#ref_table');
-    if(result.hasOwnProperty('references'))
+     if ('references' in result)
     {
-        for (var j=0; j< result.references.length; j++) {
-             var ref = result.references[j].authors +". " +result.references[j].title + ". "+ result.references[j].journal;
-             if (result.references[j].hasOwnProperty('pubmed_id'))
+        ref_table.append(getReferenceList(result));
+    }
+}
+
+function format_plasmid_data(result, text_status, jqXHR, target_div_plasmid_details, target_div_plasmid_references) {
+
+    // Format table of plasmid details
+    $("#spinning_wheel_div").remove();
+    target_div_plasmid_details.append("<h3>Plasmid details</h3>");
+    target_div_plasmid_details.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
+    var table = $('#results_table');
+    table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
+
+    if ('organism' in result)
+    {
+        table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    }
+
+    if ('parent_chromosome' in result)
+    {
+        table.append("<tr><td> Parent chromosome </td><td><a href=\"/genomedetails/" + result.parent_chromosome + "\">" + result.parent_chromosome + "</a></td></tr>"); 
+    }
+
+    table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
+    table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
+    table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
+
+    // Format table of references
+    target_div_plasmid_references.append("<h3>References</h3>");
+    target_div_plasmid_references.append("<table><thead><tbody id=\"ref_table\"></tbody></table>");
+    var ref_table = $('#ref_table');
+     if ('references' in result)
+    {
+        ref_table.append(getReferenceList(result));
+    }
+}
+
+function getReferenceList(result)
+{
+    var refList = "";
+    for (var j=0; j< result.references.length; j++) {
+
+             var ref = "";
+             if ('authors' in result.references[j])
+             {
+                ref = ref + result.references[j].authors +". ";
+             }
+
+             if ('title' in result.references[j])
+             {
+                ref = ref + result.references[j].title +". ";
+             }
+
+             if ('journal' in result.references[j])
+             {
+                ref = ref + result.references[j].journal;
+             }
+             if ('pubmed_id' in result.references[j])
              {
                 ref = ref + ". PubMed ID: " + result.references[j].pubmed_id;
              }
-             ref_table.append("<tr><td>" + ref + "</td></tr>")        
+             refList = refList + "<tr><td>" + ref + "</td></tr>";       
         }
-
-    }
-
-    
-    
+        return refList;
 }
+

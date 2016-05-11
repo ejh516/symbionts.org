@@ -65,6 +65,11 @@ def gene_details(gene_id):
 def genome_details(genome_id):
     return render_template("genomedetails.html", id=genome_id)
 
+# Plasmid details page
+@app.route("/plasmiddetails/<plasmid_id>")
+def plasmid_details(plasmid_id):
+    return render_template("plasmiddetails.html", id=plasmid_id)
+
 #
 # Routes listed below provide the RESTful interface to the MongoDB database which 
 # contains the genome data
@@ -168,7 +173,22 @@ def get_genome_by_ID(genome_id):
 
     return jsonify(results)
 
+@app.route("/genome_info/<plasmid_id>")
+def get_plasmid_by_ID(genome_id):
+    eesults = {}
+    genome = db.genome
+    features = db.genome.features
 
+# Get data for given genome    
+    results = genome.find_one({"_id": plasmid_id}, {"sequence":0})
+    gene_cursor = features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id})
+    results["numGenes"]= gene_cursor.count()
+    cds_cursor = features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id})
+    results["numCDSs"]= cds_cursor.count()
+    pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': plasmid_id})
+    results["numPseudogenes"]= pseudo_cursor.count()
+    
+    return jsonify(results)
 
 #Helper functions to execute common queries on the database
 
