@@ -158,7 +158,7 @@ def get_genome_info():
 
 @app.route("/genome_info/<genome_id>")
 def get_genome_by_ID(genome_id):
-    results = {}
+
     genome = db.genome
     features = db.genome.features
 
@@ -175,7 +175,7 @@ def get_genome_by_ID(genome_id):
 
 @app.route("/genome_info/<plasmid_id>")
 def get_plasmid_by_ID(genome_id):
-    eesults = {}
+  
     genome = db.genome
     features = db.genome.features
 
@@ -187,7 +187,7 @@ def get_plasmid_by_ID(genome_id):
     results["numCDSs"]= cds_cursor.count()
     pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': plasmid_id})
     results["numPseudogenes"]= pseudo_cursor.count()
-    
+
     return jsonify(results)
 
 #Helper functions to execute common queries on the database
