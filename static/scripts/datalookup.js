@@ -60,7 +60,7 @@ function format_species_name(species) {
 
 function format_genome_results(result, text_status, jqXHR, target_div) {
 
-    var header_row = "<tr><th>Genome ID</th><th>Organism</th><th>Taxonomy</th><th>No. Plasmids</th><th>No. Genes</th><th>No. CDSs</th><th>No. Pseudogenes</th></tr>";
+    var header_row = "<tr><th>Genome ID</th><th>Organism</th><th>Taxonomy</th><th>No. Plasmids</th><th>No. Genes</th><th>No. CDSs</th><th>No. Pseudogenes</th><th>No. tRNAs</th><th>No. rRNAs</th></tr>";
 
     $("#spinning_wheel_div").remove();
      target_div.append("<h3>" + result.hit_count + " Genomes found</h3>");
@@ -106,7 +106,7 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
                 row_cells = row_cells + "<td>0</td>";
             }
 
-            row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes + "</td>";
+            row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes +"</td><td>" + genome.numTRNAs + "</td><td>" + genome.numRRNAs + "</td>";
             table.append("<tr>" + row_cells + "</tr>");
                        
         }
@@ -152,6 +152,8 @@ function format_genome_data(result, text_status, jqXHR, target_div_details, targ
     table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
     table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
     table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
+    table.append("<tr><td> No. tRNAs </td><td>" + result.numTRNAs + "</td></tr>");
+    table.append("<tr><td> No. rRNAs </td><td>" + result.numRRNAs + "</td></tr>");
 
     // Format table of references
     target_div_references.append("<h3>References</h3>");
@@ -185,6 +187,8 @@ function format_plasmid_data(result, text_status, jqXHR, target_div_plasmid_deta
     table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
     table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
     table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
+    table.append("<tr><td> No. tRNAs </td><td>" + result.numTRNAs + "</td></tr>");
+    table.append("<tr><td> No. rRNAs </td><td>" + result.numRRNAs + "</td></tr>");
 
     // Format table of references
     target_div_plasmid_references.append("<h3>References</h3>");

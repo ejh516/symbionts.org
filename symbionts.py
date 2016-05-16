@@ -142,14 +142,15 @@ def get_genome_info():
         raw_results = []
         for result in genome_cursor:
             #for each genome, count the number of genes in the features collection
-            gene_cursor = features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]})
-            result["numGenes"]= gene_cursor.count()
+            result["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             #for each genome, count the number of CDSs in the features collection
-            cds_cursor = features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]})
-            result["numCDSs"]= cds_cursor.count()
+            result["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             #for each genome, count the number of pseudogenes in the features collection
-            pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': result["_id"]})
-            result["numPseudogenes"]= pseudo_cursor.count()
+            result["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': result["_id"]}).count()
+            #for each genome, count the number of tRNAs in the features collection
+            result["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
+            #for each genome, count the number of rRNAs in the features collection
+            result["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             raw_results.append(result)
    
         results['results'] = raw_results
@@ -164,12 +165,11 @@ def get_genome_by_ID(genome_id):
 
 # Get data for given genome    
     results = genome.find_one({"_id": genome_id}, {"sequence":0})
-    gene_cursor = features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id})
-    results["numGenes"]= gene_cursor.count()
-    cds_cursor = features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id})
-    results["numCDSs"]= cds_cursor.count()
-    pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': genome_id})
-    results["numPseudogenes"]= pseudo_cursor.count()
+    results["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
+    results["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
+    results["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': genome_id}).count()
+    results["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
+    results["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
 
     return jsonify(results)
 
@@ -181,12 +181,13 @@ def get_plasmid_by_ID(genome_id):
 
 # Get data for given genome    
     results = genome.find_one({"_id": plasmid_id}, {"sequence":0})
-    gene_cursor = features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id})
-    results["numGenes"]= gene_cursor.count()
-    cds_cursor = features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id})
-    results["numCDSs"]= cds_cursor.count()
-    pseudo_cursor = features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': plasmid_id})
-    results["numPseudogenes"]= pseudo_cursor.count()
+    results["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
+    results["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
+    results["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': plasmid_id}).count()
+    
+    # Not sure if plasmids have tRNAs and rRNAs - remove these laster if necessary
+    results["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
+    results["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
 
     return jsonify(results)
 
