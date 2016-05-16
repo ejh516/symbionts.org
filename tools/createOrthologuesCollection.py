@@ -33,6 +33,11 @@ db = client[args.database]
 internal_blast_hits = db[args.existing_collection]
 orthologues = db[args.orthologues_collection]
 
+internal_blast_hits_indices = internal_blast_hits.index_information().keys()
+
+if 'evalue_score' not in internal_blast_hits_indices:
+    internal_blast_hits.create_index([("evalue",1), ("score", -1)], name='evalue_score')
+
 
 # get all distinct qids in the collection
 
@@ -51,17 +56,19 @@ for qid in set(qids[:20]):
           if (orthologues.find({"qid":qid, "sgenome":sgenome}).limit(1).count() == 0):               
 
                # get best hit for that qid and that sgenome after sorting by evalue and then score
-               q_hit = internal_blast_hits.find({"qid":qid, "sgenome":sgenome}).sort([["evalue",1], ["score",-1]]).limit(1)
+               q_hit = internal_blast_hits.find({"qid":qid, "sgenome":sgenome}).sort([["evalue",1], ["score",-1]])
+               q_best_hit = q_hit[0]
 
                # see if the sid in best hit has the qid as best hit in qid's genome
                qgenome = internal_blast_hits.find_one({"qid":qid},{"qgenome":1})
-               s_hit = internal_blast_hits.find({"qid":q_hit[0]["sid"], "sgenome":qgenome["qgenome"]}).sort([["evalue",1], ["score",-1]]).limit(1)
+               s_hit = internal_blast_hits.find({"qid":q_best_hit["sid"], "sgenome":qgenome["qgenome"]}).sort([["evalue",1], ["score",-1]])
+               s_best_hit = s_hit[0]
 
                if (s_hit.count()>0):
-                    if (s_hit[0]["sid"] == qid):
+                    if (s_best_hit["sid"] == qid):
                          # print "Found a BBH: %s, %s and %s, %s" %(q_hit[0]["qid"],q_hit[0]["qgenome"],q_hit[0]["sid"],q_hit[0]["sgenome"])
-                         # orthologues.insert_one({"qid": q_hit[0]["qid"], "sid": q_hit[0]["sid"], "qgenome": q_hit[0]["qgenome"], "sgenome": q_hit[0]["sgenome"]})
-                         orthologues.insert_one(q_hit[0])
+                          orthologues.insert_one({"qid": q_best_hit["qid"], "sid": q_best_hit["sid"], "qgenome": q_best_hit["qgenome"], "sgenome": q_best_hit["sgenome"]})
+                         
 
 
 
