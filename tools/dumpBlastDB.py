@@ -44,8 +44,8 @@ genomes = db[args.genomecollection]
 features = db[args.featurecollection]
 filename = args.filename[0]
 
-
-tmpfile = open(filename, "w")
+if not args.split:
+    tmpfile = open(filename, "w")
 for i, genome in enumerate(genomes.find()):
     if args.split:
         tmpfile = open("Genome" + str(i) + filename, "w")

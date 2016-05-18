@@ -184,7 +184,7 @@ def get_plasmid_by_ID(genome_id):
     results["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
     results["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
     results["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': plasmid_id}).count()
-    
+
     # Not sure if plasmids have tRNAs and rRNAs - remove these laster if necessary
     results["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
     results["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
