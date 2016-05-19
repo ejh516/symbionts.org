@@ -229,3 +229,10 @@ function getReferenceList(result)
         return refList;
 }
 
+function format_basic_gene_data(result, text_status, jqXHR, target_div) {
+
+    // Format table of genome details
+    $("#spinning_wheel_div").remove();
+    target_div.append("<h3>Gene details!!!</h3>");
+}
+

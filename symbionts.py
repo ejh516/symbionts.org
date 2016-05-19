@@ -110,18 +110,24 @@ def full_text_search(genome, search_text):
 
     return jsonify(results)
 
-@app.route("/gene/<gene_id>")
+@app.route("/gene_info/<gene_id>")
 def get_gene_by_ID(gene_id):
 # TODO: retrieve the feature details, replicon and genomes from MongoDB
     oid = ObjectId(gene_id)
-    feature_collection = db.genome.features
-    gene_details = feature_collection.find_one
-    gene_details['_id'] = str(gene_details['_id'])
-    replicon_details = db.genome.find_one({"_id": gene_details['genome']}, {"sequence": 0})
-    genome_details = None
-    if replicon_details['replicon_type'] == "plasmid":
-        genome_details = db.genome.find_one({"_id": replicon_details['genome']}, {"sequence": 0})
-    return jsonify({"feature": gene_details, "replicon": replicon_details, "genome": genome_details});
+    features = db.genome.features
+    results = features.find_one({"_id": oid}, {"translation":0})
+    results["_id"] = "pretend id"
+    results["stuff"] = "some stuff"
+
+    return jsonify(results)
+
+    # gene_details = feature_collection.find_one
+    # gene_details['_id'] = str(gene_details['_id'])
+    # replicon_details = db.genome.find_one({"_id": gene_details['genome']}, {"sequence": 0})
+    # genome_details = None
+    # if replicon_details['replicon_type'] == "plasmid":
+    #     genome_details = db.genome.find_one({"_id": replicon_details['genome']}, {"sequence": 0})
+    # return jsonify({"feature": gene_details, "replicon": replicon_details, "genome": genome_details});
 
 @app.route("/genome_info")
 def get_genome_info():
@@ -190,6 +196,8 @@ def get_plasmid_by_ID(genome_id):
     results["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
 
     return jsonify(results)
+
+
 
 #Helper functions to execute common queries on the database
 

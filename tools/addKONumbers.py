@@ -63,12 +63,13 @@ with open(KOFeatureFilename, "r") as KOFeatureFile:
                KeggDetails[KONumber] = {}
                KeggDetails[KONumber]["KO_name"] = parsedline[4]
                rest = parsedline[5].split("[EC:")
-               KeggDetails[KONumber]["KO_definition"] = rest[0][1:]
+               KeggDetails[KONumber]["KO_definition"] = rest[0][1:-1].replace("'","")
                if len(rest)>1:
                     KeggDetails[KONumber]["KO_ECNumber"] = rest[1][:-2]
                KeggDetails[KONumber]["KO_pathway"] = "%s, %s, %s" % (pathA, pathB, pathC)
 
-# open results file from KAAS query (contains feature IDs and KO numbers) and add corresponding KO details to each feature
+# open results file from KAAS query (contains feature IDs from single genome and corresponding KO numbers where found) 
+# and add corresponding KO details to each feature
 with open(KODetailsFilename, "r") as KODetailsFile:
      for line in KODetailsFile:
           parsedline = re.split('\t',line)
@@ -79,14 +80,12 @@ with open(KODetailsFilename, "r") as KODetailsFile:
                     KO_name = KeggDetails[KO]["KO_name"]
                     KO_definition = KeggDetails[KO]["KO_definition"]
                     KO_pathway = KeggDetails[KO]["KO_pathway"]
-
                     features.update({"_id":ObjectId(ID)},{"$set":{"KO_number":KO, "KO_name":KO_name, "KO_definition": KO_definition, "KO_pathway": KO_pathway}})
-
                     if "KO_ECNumber" in KeggDetails[KO].keys():
-                         print "added ec number"
                          KO_ECNumber = KeggDetails[KO]["KO_ECNumber"]
                          features.update({"_id":ObjectId(ID)},{"$set":{"KO_ECNumber":KO_ECNumber}})
-
+               else:
+                    features.update({"_id":ObjectId(ID)},{"$set":{"KO_Number":KO}})
                
 
 
