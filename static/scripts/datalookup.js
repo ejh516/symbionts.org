@@ -22,7 +22,20 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
         var table = $('#results_table');
         for (var i=0; i < result.results.length; i++) {
             feature = result.results[i];
-            var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag + "</a></td>";
+
+            if (feature.type == "gene")// TO DO: figure out why (for genes only - not CDSs) if you put locus_tag here you can't click on the link. 
+            {
+                var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature._id+ "</a></td>";
+            }
+
+            else if (feature.hasOwnProperty('locus_tag'))
+            {
+                var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag + "</a></td>";
+            }
+            else {
+                row_cells = row_cells + "<td></td>"; //some features may not have locus_tags?
+            }
+
             if (feature.hasOwnProperty('gene')) {
                 row_cells = row_cells + "<td>" + feature.gene + "</td>";
             } else {
@@ -231,8 +244,103 @@ function getReferenceList(result)
 
 function format_basic_gene_data(result, text_status, jqXHR, target_div) {
 
-    // Format table of genome details
     $("#spinning_wheel_div").remove();
-    target_div.append("<h3>Gene details!!!</h3>");
+
+    header = "<h3>Gene details: "
+    if('locus_tag' in result)
+    {
+        header = header + result.locus_tag
+    }    
+    target_div.append(header + "</h3>");
+
+    target_div.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
+    var table = $('#results_table');
+
+    if ('genome' in result && 'replicon_type' in result)
+    {
+        if(result.replicon_type == "chromosome")
+        {
+            table.append("<tr><td> Genome </td><td><a href=\"/genomedetails/" + result.genome + "\">" + result.genome + "</a></td></tr>"); 
+        }
+        if(result.replicon_type == "plasmid")
+        {
+            table.append("<tr><td> Plasmid </td><td><a href=\"/plasmiddetails/" + result.genome + "\">" + result.genome + "</a></td></tr>"); 
+        }
+    }
+
+    if ('organism' in result)
+    {
+        table.append("<tr><td> Species </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    }
+
+    if ('type' in result)
+    {
+        table.append("<tr><td> Type </td><td>" + result.type + "</td></tr>");
+    }
+
+    if ('gene' in result)
+    {
+        table.append("<tr><td> Name </td><td>" + result.gene + "</td></tr>");
+    }
+
+    if ('location' in result)
+    {
+        table.append("<tr><td> Location </td><td> <i>Start:</i> " + result.location.start + " <i>End:</i> " + result.location.end + " <i>Strand:</i> " + result.location.strand + "</td></tr>");
+    }
+
+    if ('function' in result)
+    {
+        table.append("<tr><td> Function </td><td>" + result.function + "</td></tr>");
+    }
+
+    if ('product' in result)
+    {
+        table.append("<tr><td> Product </td><td>" + result.product + "</td></tr>");
+    }
+
+    if ('EC_number' in result)
+    {
+        table.append("<tr><td> EC Number </td><td>" + result.EC_number + "</td></tr>");
+    }
+
+    if ('protein_id' in result)
+    {
+
+        table.append("<tr><td> Protein ID </td><td><a href=http://www.ncbi.nlm.nih.gov/protein/" + result.protein_id + ">" + result.protein_id+ "</a></td></tr>"); 
+    }
+
+    if ('db_xref' in result)
+    {
+
+        var db_xref = result.db_xref[0];
+        for (var j=1; j< result.db_xref.length; j++) {
+         db_xref = db_xref + "</br>" + result.db_xref[j];
+        }
+        table.append("<tr><td> Other database references </td><td>" + db_xref + "</td></tr>");
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

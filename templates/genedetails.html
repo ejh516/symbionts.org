@@ -10,7 +10,7 @@
             });
 
             function getBasicDetails(gene_id, target_div) {
-                var title = "<h2>Gene details ooo : "+ gene_id;
+                var title = "<h2>Gene details";
                 title = title + "</h2>";
                 imagediv = "<div id=\"spinning_wheel_div\" align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
                 target_div.html(title + imagediv);
@@ -22,17 +22,48 @@
                         "dataType": 'json'
                        });
             }
+
+            function draw(){
+                var canvas = document.getElementById('aCanvas');
+                if (canvas.getContext){
+                var ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = "rgb(200,0,0)";
+                ctx.fillRect (10, 10, 55, 50);
+                ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+                ctx.fillRect (30, 30, 55, 50);
+
+                ctx.beginPath();
+                ctx.arc(275,75,50,0,Math.PI*2,true); // Outer circle
+                ctx.moveTo(310,75);
+                ctx.arc(275,75,35,0,Math.PI,false);  // Mouth (clockwise)
+                ctx.moveTo(265,65);
+                ctx.arc(260,65,5,0,Math.PI*2,true);  // Left eye
+                ctx.moveTo(295,65);
+                ctx.arc(290,65,5,0,Math.PI*2,true);  // Right eye
+                ctx.stroke();
+        }
+      }
         </script>
+    <style type="text/css">
+      canvas { border: 1px solid black; }
+    </style>
     </head>
-    <body>
+    <body onload="draw();">
         <div id='allContent'>
             {% include 'header.html' %}
             {% include 'menu.html' %}
             <div id='mainContent'>
-            </div>
             <div id='basic_details'>
                 </div>
+            <div id='genomic_context'>    
+            <canvas id="aCanvas" width="500" height="150">
+            </canvas>
+            </div>
+            </div>
+
             {% include 'footer.html' %}
         </div>
+        
     </body>
 </html>
