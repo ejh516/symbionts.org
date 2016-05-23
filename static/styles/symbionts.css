@@ -103,3 +103,10 @@ div#search_results table th {
     font-style: italic;
     font-size: 14pt;
 }
+
+canvas {
+  display:block;
+  border:solid 1px #000;
+  float: right;
+}
+

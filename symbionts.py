@@ -126,6 +126,85 @@ def get_gene_by_ID(gene_id):
   
     return jsonify(gene_results)
 
+@app.route("/orthologue_info/<gene_id>")
+def get_orthologues_by_ID(gene_id):
+
+    oid = ObjectId(gene_id)
+
+    features = db.genome.features
+    # genome = db.genome
+    orthologues = db.orthologues
+
+    results = {}
+
+    current_gene_results = {}
+    current_gene_results["_id"] = gene_id
+
+    current_gene = features.find_one({"_id": oid}, {"translation":0})
+    current_gene_results["genome"] = current_gene["genome"]
+
+    if "locus_tag" in current_gene:
+        current_gene_results["locus_tag"] = current_gene["locus_tag"]
+    else:
+        current_gene_results["locus_tag"] = "Locus tag unknown."
+  
+    if "location" in current_gene:
+        current_gene_results["start"] = current_gene["location"]["start"]
+        current_gene_results["end"] = current_gene["location"]["end"]
+        current_gene_results["strand"] = current_gene["location"]["strand"]
+
+    results["current_gene"] = current_gene_results
+
+    orthologue_results =[]
+    aResult ={}
+
+    qids = orthologues.find({"qid":gene_id})
+    for result in qids:
+        aResult["_id"] = result["sid"]
+        aResult["genome"] = result["sgenome"]
+        orth_oid = ObjectId(result["sid"])
+        gene_results = features.find_one({"_id": orth_oid}, {"translation":0})
+        if 'location' in gene_results:
+            aResult["start"] = gene_results["location"]["start"]
+            aResult["end"] = gene_results["location"]["end"]
+            aResult["strand"] = gene_results["location"]["strand"]
+        else:
+            aResult["start"] = "0"
+            aResult["end"] = "0"
+            aResult["strand"] = "0"
+        if "locus_tag" in gene_results:
+            aResult["locus_tag"] = gene_results["locus_tag"]
+        else:
+            aResult["locus_tag"] = "Locus tag unknown."
+
+        orthologue_results.append(aResult)
+
+    sids = orthologues.find({"sid":gene_id})
+    for result in sids:
+        aResult["_id"] = result["qid"]
+        aResult["genome"] = result["qgenome"]
+        orth_oid = ObjectId(result["qid"])
+        gene_results = features.find_one({"_id": orth_oid}, {"translation":0})
+        if 'location' in gene_results:
+            aResult["start"] = gene_results["location"]["start"]
+            aResult["end"] = gene_results["location"]["end"]
+            aResult["strand"] = gene_results["location"]["strand"]
+        else:
+            aResult["start"] = "0"
+            aResult["end"] = "0"
+            aResult["strand"] = "0"
+        if "locus_tag" in gene_results:
+            aResult["locus_tag"] = gene_results["locus_tag"]
+        else:
+            aResult["locus_tag"] = "Locus tag unknown."
+
+        orthologue_results.append(aResult)
+
+    results["orthologues"] = orthologue_results
+
+  
+    return jsonify(results)
+
 
 @app.route("/genome_info")
 def get_genome_info():

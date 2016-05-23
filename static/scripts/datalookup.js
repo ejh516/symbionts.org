@@ -320,6 +320,105 @@ function format_basic_gene_data(result, text_status, jqXHR, target_div) {
     }
 }
 
+function format_genomic_context_data(result, text_status, jqXHR, target_div, target_canvas) {
+
+    locus = result.current_gene.locus_tag;
+        target_div.append("<h3>" + locus + "</h3>");
+    
+    start = parseInt(result.current_gene.start)
+    end = parseInt(result.current_gene.end)
+    size = (end - start)/10
+    strand = result.current_gene.strand 
+
+
+   var gene_plot = [{ x: 0, y: 0, length: size, locus_tag:locus}, 
+    { x: 100,y: 100, length: 50, locus_tag:locus}, 
+    {x: 200,y: 200, length: 50, locus_tag: locus}
+    ];
+
+var can = target_canvas,
+  ctx = can.getContext('2d'),
+  dragging = false,
+  lastX = 0,
+  translated = 0;
+
+var grid = (function(dX, dY){
+  var can = document.createElement("canvas"),
+      ctx = can.getContext('2d');
+  can.width = dX;
+  can.height = dY;
+  // fill canvas color
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, dX, dY);
+  
+  // x axis
+  ctx.strokeStyle = 'black';
+  ctx.moveTo(.5, 0.5);
+  ctx.lineTo(dX + .5, 0.5);
+  ctx.stroke();
+  
+  // y axis
+  ctx.moveTo(.5, .5);
+  ctx.lineTo(.5, dY + .5);
+  ctx.stroke();
+  
+  return ctx.createPattern(can, 'repeat');
+})(100, 100);
+
+ctx.scale(1, -1);
+ctx.translate(0, -400);
+
+can.onmousedown = function (e) {
+  var evt = e || event;
+  dragging = true;
+  lastX = evt.offsetX;
+}
+
+window.onmousemove = function (e) {
+  var evt = e || event;
+  if (dragging) {
+    var delta = evt.offsetX - lastX;
+    translated += delta;
+    ctx.translate(delta, 0);
+    lastX = evt.offsetX;
+    draw();
+  }
+}
+
+window.onmouseup = function () {
+  dragging = false;
+}
+
+
+
+function draw() {
+  ctx.clearRect(-translated, 0, 600, 400);
+  ctx.rect(-translated, 0, 600, 400);
+  ctx.fillStyle = grid;
+  ctx.fill();
+  ctx.fillStyle = "rgb(200,0,0)";
+  ctx.font="30px Verdana";
+  for (var i = 0; i < gene_plot.length; i++) {
+    ctx.beginPath();
+    ctx.fillStyle = "rgb(200,0,0)";
+    ctx.fillRect (gene_plot[i].x, gene_plot[i].y, gene_plot[i].length, 10);
+    // ctx.fill();
+    ctx.fillStyle = "rgb(0,0,0)";
+    ctx.scale(1,-1);
+    ctx.strokeText(gene_plot[i].locus_tag, gene_plot[i].x, -gene_plot[i].y);
+    ctx.scale(1,-1);
+    //ctx.fill();
+  }
+}
+
+draw();
+
+
+
+}
+    
+
+
 
 
 
