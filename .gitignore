@@ -1,4 +1,5 @@
 *.pyc
 *.swp
+.DS_Store
 tools/*.fasta
 tools/selfmatches.txt
