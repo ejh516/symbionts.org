@@ -336,34 +336,34 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     {x: 200,y: 200, length: 50, locus_tag: locus}
     ];
 
-var can = target_canvas,
-  ctx = can.getContext('2d'),
-  dragging = false,
-  lastX = 0,
-  translated = 0;
+    var can = target_canvas,
+      ctx = can.getContext('2d'),
+      dragging = false,
+      lastX = 0,
+      translated = 0,
+      scale_factor = 1.0,
+      scale = 1.0;
 
-var grid = (function(dX, dY){
-  var can = document.createElement("canvas"),
-      ctx = can.getContext('2d');
-  can.width = dX;
-  can.height = dY;
-  // fill canvas color
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, dX, dY);
+    var grid = (function(dX, dY){
+      var can = document.createElement("canvas"),
+          ctx = can.getContext('2d');
+      can.width = dX;
+      can.height = dY;
+
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, dX, dY);
+
+      ctx.strokeStyle = 'black';
+      ctx.moveTo(.5, 0.5);
+      ctx.lineTo(dX + .5, 0.5);
+      ctx.stroke();
+
+      ctx.moveTo(.5, .5);
+      ctx.lineTo(.5, dY + .5);
+      ctx.stroke();
   
-  // x axis
-  ctx.strokeStyle = 'black';
-  ctx.moveTo(.5, 0.5);
-  ctx.lineTo(dX + .5, 0.5);
-  ctx.stroke();
-  
-  // y axis
-  ctx.moveTo(.5, .5);
-  ctx.lineTo(.5, dY + .5);
-  ctx.stroke();
-  
-  return ctx.createPattern(can, 'repeat');
-})(100, 100);
+          return ctx.createPattern(can, 'repeat');
+        })(100, 100);
 
 ctx.scale(1, -1);
 ctx.translate(0, -400);
@@ -391,7 +391,56 @@ window.onmouseup = function () {
 
 
 
+window.addEventListener("mousewheel", mouseWheelHandler, false);
+
+function mouseWheelHandler(e){
+
+
+    var mousex = e.clientX - can.offsetLeft;
+    var mousey = e.clientY - can.offsetTop;
+
+    if (mousex<=can.width && mousex>0 && mousey<=can.height && mousey>0)// check if cursor is within canvas
+    {
+
+        var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+
+        // var wheel = event.wheelDelta/120;//n or -n
+        // var zoom = 1 + wheel/2;
+        // scale_factor *= zoom;
+
+        draw(scale_factor);
+        if (delta < 0) { 
+            scale_factor =  0.8;        
+            draw(scale_factor);  
+            return false;
+        }
+        if (delta > 0) 
+        { 
+            scale_factor = 1.25;
+            draw(scale_factor);
+            return false;
+        }
+
+        return false;
+    }
+}
+
+
 function draw() {
+
+    //fix scaling
+  if (scale_factor<1 && scale <=1 ) //can't zoom out anymore
+  {
+        scale_factor = 1.0;//don't zoom out 
+  } 
+
+  else
+  {
+      ctx.scale(scale_factor,scale_factor);
+      scale = scale*scale_factor;
+      scale_factor = 1.0;//reset scale_factor after scaling
+    }
+
   ctx.clearRect(-translated, 0, 600, 400);
   ctx.rect(-translated, 0, 600, 400);
   ctx.fillStyle = grid;
@@ -402,16 +451,14 @@ function draw() {
     ctx.beginPath();
     ctx.fillStyle = "rgb(200,0,0)";
     ctx.fillRect (gene_plot[i].x, gene_plot[i].y, gene_plot[i].length, 10);
-    // ctx.fill();
     ctx.fillStyle = "rgb(0,0,0)";
     ctx.scale(1,-1);
     ctx.strokeText(gene_plot[i].locus_tag, gene_plot[i].x, -gene_plot[i].y);
     ctx.scale(1,-1);
-    //ctx.fill();
   }
 }
 
-draw();
+setInterval(draw,100);
 
 
 

@@ -153,6 +153,8 @@ def get_orthologues_by_ID(gene_id):
         current_gene_results["end"] = current_gene["location"]["end"]
         current_gene_results["strand"] = current_gene["location"]["strand"]
 
+        # neighbours = features.find({"genome": current_gene["genome"], "start": $gt()})
+
     results["current_gene"] = current_gene_results
 
     orthologue_results =[]
