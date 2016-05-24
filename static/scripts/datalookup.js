@@ -61,14 +61,22 @@ function format_gene_data(results, text_status, jqXHR, target_div, all_species) 
 }
 
 function format_species_name(species) {
-    var words = species.split(" ");
-    if (words.length > 1) {
-        species = "<i>" + words[0] + " " + words[1] + "</i>";
-        for (i = 2; i < words.length; i++) {
-            species = species + " " + words[i];
-        }
-    }
-    return species
+
+     //alert("Formatting species: " + species)
+
+     var words = species.split(" ");
+
+     if (words.length > 1) {
+        species = "<i>" + words[0] + " " +words[1]+ "</i>";
+
+         for (var j = 2; j < words.length; j++) {
+
+              species = species + " " + words[j];
+          }
+     }
+
+     //alert("Finished formatting species: " + species)
+    return species;
 }
 
 function format_genome_results(result, text_status, jqXHR, target_div) {
@@ -320,21 +328,65 @@ function format_basic_gene_data(result, text_status, jqXHR, target_div) {
     }
 }
 
+function format_orthologue_data(returned_result, text_status, jqXHR, target_div) {
+
+    locus = returned_result.current_gene.locus_tag;
+    target_div.append("<h3>Orthologues: " + locus + "</h3>");
+
+    var header_row = "<tr><th>Orthologue</th><th>Genome</th><th>Organism</th></tr>";
+    target_div.append("<table><thead>" + header_row + "</thead><tbody id=\"orthologues_table\"></tbody></table>");
+    var table = $('#orthologues_table');
+
+    numOrthologues = returned_result.orthologues.length;
+     for (var i=0; i<numOrthologues; i++)
+     {
+             if ('genome' in returned_result.orthologues[i] && 'replicon_type' in returned_result.orthologues[i])
+            {
+                if(returned_result.orthologues[i].replicon_type == "chromosome")
+                {
+
+                    table.append("<tr><td><a href=\"/genedetails/" + returned_result.orthologues[i]._id + "\">" + 
+                                returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/genomedetails/" + 
+                                returned_result.orthologues[i].genome + "\">" + 
+                                returned_result.orthologues[i].genome + "</a></td>" +
+                                "<td>" + returned_result.orthologues[i].organism + "</td></tr>"); 
+                }
+                if(returned_result.orthologues[i].replicon_type == "plasmid")
+                {
+                    table.append("<tr><td><a href=\"/genedetails/" + returned_result.orthologues[i]._id + "\">" + 
+                        returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/plasmiddetails/" + 
+                        returned_result.orthologues[i].genome + "\">" + 
+                        returned_result.orthologues[i].genome + "</a></td><td>"+
+                        format_species_name(returned_result.orthologues[i].organism)+"</td></tr>"); 
+                }
+            }
+
+
+     }
+
+
+}
+
+
 function format_genomic_context_data(result, text_status, jqXHR, target_div, target_canvas) {
 
     locus = result.current_gene.locus_tag;
-        target_div.append("<h3>" + locus + "</h3>");
+    target_div.append("<h3>" + locus + "</h3>");
     
     start = parseInt(result.current_gene.start)
     end = parseInt(result.current_gene.end)
     size = (end - start)/10
-    strand = result.current_gene.strand 
 
+    var gene_plot = [{x: 0, y: 300, length: size, locus_tag: locus, strand: result.current_gene.strand }]
 
-   var gene_plot = [{ x: 0, y: 0, length: size, locus_tag:locus}, 
-    { x: 100,y: 100, length: 50, locus_tag:locus}, 
-    {x: 200,y: 200, length: 50, locus_tag: locus}
-    ];
+    numOrthologues = result.orthologues.length;
+     for (i=0; i<numOrthologues; i++)
+     {
+            start = parseInt(result.orthologues[i].start)
+            end = parseInt(result.orthologues[i].end)
+            size = (end - start)/10
+            gene_plot.push({x:0, y: 300-((i+1)*100), length: size, locus_tag:result.orthologues[i].locus_tag, strand: result.orthologues[i].strand })
+     }
 
     var can = target_canvas,
       ctx = can.getContext('2d'),
@@ -345,56 +397,53 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       scale = 1.0;
 
     var grid = (function(dX, dY){
-      var can = document.createElement("canvas"),
-          ctx = can.getContext('2d');
-      can.width = dX;
-      can.height = dY;
+        var can = document.createElement("canvas"),
+        ctx = can.getContext('2d');
+        can.width = dX;
+        can.height = dY;
 
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, dX, dY);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, dX, dY);
 
-      ctx.strokeStyle = 'black';
-      ctx.moveTo(.5, 0.5);
-      ctx.lineTo(dX + .5, 0.5);
-      ctx.stroke();
+        ctx.strokeStyle = 'black';
+        ctx.moveTo(.5, 0.5);
+        ctx.lineTo(dX + .5, 0.5);
+        ctx.stroke();
 
-      ctx.moveTo(.5, .5);
-      ctx.lineTo(.5, dY + .5);
-      ctx.stroke();
+        ctx.moveTo(.5, .5);
+        ctx.lineTo(.5, dY + .5);
+        ctx.stroke();
   
-          return ctx.createPattern(can, 'repeat');
-        })(100, 100);
+        return ctx.createPattern(can, 'repeat');
+        })(500, 100);
 
-ctx.scale(1, -1);
-ctx.translate(0, -400);
+    ctx.scale(1, -1);
+    ctx.translate(0, -400);
 
-can.onmousedown = function (e) {
-  var evt = e || event;
-  dragging = true;
-  lastX = evt.offsetX;
-}
+    can.onmousedown = function (e) {
+        var evt = e || event;
+        dragging = true;
+        lastX = evt.offsetX;
+    }
 
-window.onmousemove = function (e) {
-  var evt = e || event;
-  if (dragging) {
-    var delta = evt.offsetX - lastX;
-    translated += delta;
-    ctx.translate(delta, 0);
-    lastX = evt.offsetX;
-    draw();
-  }
-}
+    window.onmousemove = function (e) {
+        var evt = e || event;
+        if (dragging) {
+            var delta = evt.offsetX - lastX;
+            translated += delta;
+            ctx.translate(delta, 0);
+            lastX = evt.offsetX;
+            draw();
+            }
+    }
 
-window.onmouseup = function () {
-  dragging = false;
-}
+    window.onmouseup = function () {
+        dragging = false;
+    }
 
+    window.addEventListener("mousewheel", mouseWheelHandler, false);
 
-
-window.addEventListener("mousewheel", mouseWheelHandler, false);
-
-function mouseWheelHandler(e){
-
+    function mouseWheelHandler(e){
 
     var mousex = e.clientX - can.offsetLeft;
     var mousey = e.clientY - can.offsetTop;
@@ -423,42 +472,45 @@ function mouseWheelHandler(e){
 
         return false;
     }
-}
-
-
-function draw() {
-
-    //fix scaling
-  if (scale_factor<1 && scale <=1 ) //can't zoom out anymore
-  {
-        scale_factor = 1.0;//don't zoom out 
-  } 
-
-  else
-  {
-      ctx.scale(scale_factor,scale_factor);
-      scale = scale*scale_factor;
-      scale_factor = 1.0;//reset scale_factor after scaling
     }
 
-  ctx.clearRect(-translated, 0, 600, 400);
-  ctx.rect(-translated, 0, 600, 400);
-  ctx.fillStyle = grid;
-  ctx.fill();
-  ctx.fillStyle = "rgb(200,0,0)";
-  ctx.font="30px Verdana";
-  for (var i = 0; i < gene_plot.length; i++) {
-    ctx.beginPath();
-    ctx.fillStyle = "rgb(200,0,0)";
-    ctx.fillRect (gene_plot[i].x, gene_plot[i].y, gene_plot[i].length, 10);
-    ctx.fillStyle = "rgb(0,0,0)";
-    ctx.scale(1,-1);
-    ctx.strokeText(gene_plot[i].locus_tag, gene_plot[i].x, -gene_plot[i].y);
-    ctx.scale(1,-1);
-  }
-}
 
-setInterval(draw,100);
+    function draw() {
+     
+        //fix scaling
+      if (scale_factor<1 && scale <=1 ) //can't zoom out anymore
+      {
+            scale_factor = 1.0;//don't zoom out 
+      } 
+
+      else
+      {
+          ctx.scale(scale_factor,scale_factor);
+          scale = scale*scale_factor;
+          scale_factor = 1.0;//reset scale_factor after scaling
+        }
+
+      ctx.clearRect(-translated, 0, 600, 400);
+      ctx.rect(-translated, 0, 600, 400);
+      ctx.fillStyle = grid;
+      ctx.fill();
+      ctx.fillStyle = "rgb(0,0,0)";
+      ctx.font="20px Helvetica";
+      for (var i = 0; i < gene_plot.length; i++) 
+      {
+        ctx.beginPath();
+        
+        ctx.fillRect (gene_plot[i].x, gene_plot[i].y-10, gene_plot[i].length, 20);
+        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.scale(1,-1);
+        ctx.fillText(gene_plot[i].locus_tag, gene_plot[i].x, -(gene_plot[i].y+15));
+        ctx.scale(1,-1);
+
+        ctx.fillStyle = "rgb(200,0,0)";//change colour so that orthlogues arae red
+      }
+    }
+
+    setInterval(draw,100);
 
 
 

@@ -6,7 +6,8 @@
             $(document).ready(function () {
                
                     getBasicDetails("{{ id }}",$('#basic_details'));
-                    getGenomicContext("{{ id }}",$('#genomic_context'),$('#practice_canvas')[0]);
+                    getOrthologues("{{ id }}",$('#orthologue_details'));
+                    getGenomicContext("{{ id }}",$('#genomic_context'),$('#genomic_context_canvas')[0]);
             
             });
 
@@ -19,6 +20,17 @@
                         "url": "/gene_info/" + gene_id, 
                         "success": function(data, status_text, jqXHR) {
                                             format_basic_gene_data(data, status_text, jqXHR, target_div);
+                                   },
+                        "dataType": 'json'
+                       });
+            }
+
+            function getOrthologues(gene_id, target_div) {
+
+                $.ajax({
+                        "url": "/orthologue_info/" + gene_id, 
+                        "success": function(data, status_text, jqXHR) {
+                                            format_orthologue_data(data, status_text, jqXHR, target_div);
                                    },
                         "dataType": 'json'
                        });
@@ -45,14 +57,13 @@
             <div id='mainContent'>
             <div id='basic_details'>
             </div>
+            <div id='orthologue_details'>
+            </div>
             <div id='genomic_context'> 
                 <h3>Genomic context</h3>
-                <canvas id="practice_canvas" width="600" height="400">
+                <canvas id="genomic_context_canvas" width="600" height="400">
                 </canvas>
             </div>
-<!--             <canvas id="gene_canvas" width="500" height="100">
-            </canvas> -->
-
             </div>
 
             {% include 'footer.html' %}
