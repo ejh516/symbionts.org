@@ -10,10 +10,9 @@
             });
 
             function getGenomes(target_div) {
-                var title = "<h2>Testing getting results for all genomes";
-                title = title + "</h2>";
+                
                 imagediv = "<div id=\"spinning_wheel_div\" align=\"center\"><img src=\"{{ url_for('static', filename='images/spinning-wheel.gif') }}\" /></div>";
-                target_div.html(title + imagediv);
+                target_div.html(imagediv);
                 $.ajax({
                         "url": "/genome_info", 
                         "success": function(data, status_text, jqXHR) {

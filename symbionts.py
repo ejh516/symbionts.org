@@ -104,8 +104,21 @@ def full_text_search(genome, search_text):
     if results['hit_count'] > 0:
         raw_results = []
         for result in features_cursor:
-            result["_id"] = str(result['_id'])
-            raw_results.append(result)
+            aResult = {"_id": "Undefined.","genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined."}
+            if '_id' in result:
+                aResult["_id"] = str(result['_id'])
+            if 'genome' in result:
+                aResult["genome"] = result['genome']               
+            if 'locus_tag' in result:
+                aResult["locus_tag"] = result['locus_tag'][0]
+            if 'gene' in result:
+                aResult["gene"] = result['gene'][0]
+            if 'type' in result:
+                aResult["type"] = result['type']
+            if 'product' in result:
+                aResult["product"] = result['product'][0]
+
+            raw_results.append(aResult)
             results['results'] = raw_results
 
     return jsonify(results)
@@ -117,14 +130,42 @@ def get_gene_by_ID(gene_id):
 
     features = db.genome.features
     genome = db.genome
+    aResult = {"_id": gene_id,"genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined.", "replicon_type": "Undefined.", "organism": "Undefined.", "location": {"start":"0","end":"0","strand":"Undefined."},"EC_number": "Undefined.","protein_id": "Undefined.","db_xref": [], "function": "Undefined."}
 
-    gene_results = features.find_one({"_id": oid}, {"translation":0})
-    replicon_results =  genome.find_one({"_id":gene_results["genome"]})
-    gene_results["organism"] = replicon_results["organism"]
-    gene_results["replicon_type"] = replicon_results["replicon_type"]
-    gene_results["_id"] = gene_id
-  
-    return jsonify(gene_results)
+    result = features.find_one({"_id": oid}, {"translation":0})
+
+    if 'locus_tag' in result:
+        aResult["locus_tag"] = result['locus_tag']
+    if 'genome' in result:
+        aResult["genome"] = result['genome']
+    if 'type' in result:
+        aResult["type"] = result['type']
+    if 'gene' in result:
+        aResult["gene"] = result['gene']
+    if 'location' in result:
+        if 'start' in result['location']:
+            aResult["location"]["start"] = result["location"]["start"]
+        if 'end' in result['location']:
+            aResult["location"]["end"] = result["location"]["end"]
+        if 'strand' in result['location']:
+            aResult["location"]["strand"] = result["location"]["strand"]
+    if 'product' in result:
+        aResult["product"] = result['product']
+    if 'EC_number' in result:
+        aResult["EC_number"] = result['EC_number']
+    if 'protein_id' in result:
+        aResult["protein_id"] = result['protein_id']
+    if 'db_xref' in result:
+        aResult["db_xref"] = result['db_xref']
+
+    replicon_result =  genome.find_one({"_id":result["genome"]})
+
+    if 'organism' in replicon_result:
+        aResult["organism"] = replicon_result["organism"]
+    if 'replicon_type' in replicon_result:
+        aResult["replicon_type"] = replicon_result["replicon_type"]
+      
+    return jsonify(aResult)
 
 @app.route("/orthologue_info/<gene_id>")
 def get_orthologues_by_ID(gene_id):
@@ -137,23 +178,19 @@ def get_orthologues_by_ID(gene_id):
 
     results = {}
 
-    current_gene_results = {}
-    current_gene_results["_id"] = gene_id
-
+    current_gene_results = {"_id":gene_id, "genome": "Undefined.", "locus_tag": "Undefined.", "start": "0", "end": "0", "strand": "Undefined."}
     current_gene = features.find_one({"_id": oid}, {"translation":0})
-    current_gene_results["genome"] = current_gene["genome"]
-
+    if "genome" in current_gene:
+        current_gene_results["genome"] = current_gene["genome"]
     if "locus_tag" in current_gene:
         current_gene_results["locus_tag"] = current_gene["locus_tag"]
-    else:
-        current_gene_results["locus_tag"] = "Locus tag unknown."
-  
     if "location" in current_gene:
-        current_gene_results["start"] = current_gene["location"]["start"]
-        current_gene_results["end"] = current_gene["location"]["end"]
-        current_gene_results["strand"] = current_gene["location"]["strand"]
-
-        # neighbours = features.find({"genome": current_gene["genome"], "start": $gt()})
+        if 'start' in current_gene['location']:
+            current_gene_results["start"] = current_gene["location"]["start"]
+        if 'end' in current_gene['location']:
+            current_gene_results["end"] = current_gene["location"]["end"]
+        if 'strand' in current_gene['location']:
+            current_gene_results["strand"] = current_gene["location"]["strand"]      
 
     results["current_gene"] = current_gene_results
 
@@ -162,7 +199,9 @@ def get_orthologues_by_ID(gene_id):
     ids = orthologues.find({"$or" :[{"qid":gene_id},{"sid":gene_id}]})
 
     for result in ids:
-        aResult = {}
+
+        aResult = {"_id": "Undefined.", "genome": "Undefined.","start": "0","end": "0","strand": "Undefined.", "organism": "Undefined.", "replicon_type": "Undefined."}
+
         if result["qid"]==gene_id:
             aResult["_id"] = result["sid"]
             aResult["genome"] = result["sgenome"]
@@ -170,25 +209,27 @@ def get_orthologues_by_ID(gene_id):
         elif result["sid"]==gene_id:
             aResult["_id"] = result["qid"]
             aResult["genome"] = result["qgenome"]
-            orth_oid = ObjectId(result["qid"])        
+            orth_oid = ObjectId(result["qid"])  
+
         gene_results = features.find_one({"_id": orth_oid}, {"translation":0})
 
         if 'location' in gene_results:
-            aResult["start"] = gene_results["location"]["start"]
-            aResult["end"] = gene_results["location"]["end"]
-            aResult["strand"] = gene_results["location"]["strand"]
-        else:
-            aResult["start"] = "0"
-            aResult["end"] = "0"
-            aResult["strand"] = "0"
+            if 'start' in gene_results['location']:
+                aResult["start"] = gene_results["location"]["start"]
+            if 'end' in gene_results['location']:
+                aResult["end"] = gene_results["location"]["end"]
+            if 'strand' in gene_results['location']:
+                aResult["strand"] = gene_results["location"]["strand"]
+
         if "locus_tag" in gene_results:
             aResult["locus_tag"] = gene_results["locus_tag"]
-        else:
-            aResult["locus_tag"] = "Locus tag unknown."
 
         replicon_results =  genome.find_one({"_id":aResult["genome"]})
-        aResult["organism"] = replicon_results["organism"]
-        aResult["replicon_type"] = replicon_results["replicon_type"]   
+
+        if 'organism' in replicon_results:
+            aResult["organism"] = replicon_results["organism"]
+        if 'replicon_type' in replicon_results:
+            aResult["replicon_type"] = replicon_results["replicon_type"]   
 
         orthologue_results.append(aResult)
   
@@ -258,16 +299,13 @@ def get_plasmid_by_ID(genome_id):
     results["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
     results["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': plasmid_id}).count()
 
-    # Not sure if plasmids have tRNAs and rRNAs - remove these laster if necessary
+# Not sure if plasmids have tRNAs and rRNAs - remove these laster if necessary
     results["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
     results["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': plasmid_id}).count()
 
     return jsonify(results)
 
-
-
 #Helper functions to execute common queries on the database
-
 
 def get_species_list():
     genome_collection = db.genome

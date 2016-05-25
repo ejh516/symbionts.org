@@ -22,35 +22,17 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
         var table = $('#results_table');
         for (var i=0; i < result.results.length; i++) {
             feature = result.results[i];
-
-            if (feature.hasOwnProperty('locus_tag')) {
-                var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag[0] + "</a></td>";
-            } else {
-                row_cells = row_cells + "<td></td>"; //some features may not have locus_tags?
-            }
-
-            if (feature.hasOwnProperty('gene')) {
-                row_cells = row_cells + "<td>" + feature.gene + "</td>";
-            } else {
-                row_cells = row_cells + "<td></td>";
-            }
+            var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag + "</a></td>";
+            row_cells = row_cells + "<td>" + feature.gene + "</td>";
             row_cells = row_cells + "<td>" + feature.type + "</td>"
             if (result.genome == 'all') {
-                var species_name = format_species_name(all_species[feature.genome]);
-                row_cells = row_cells + "<td>" + species_name + "</td>";
+               var species_name = format_species_name(all_species[feature.genome]);
+               row_cells = row_cells + "<td>" + species_name + "</td>";
             }
-            if (feature.hasOwnProperty('product')) {
-                row_cells = row_cells + "<td>" + feature.product + "</td>";
-            } else {
-                row_cells = row_cells + "<td></td>";
-            }
+            row_cells = row_cells + "<td>" + feature.product + "</td>";
             table.append("<tr>" + row_cells + "</tr>");
         }
     }
-}
-
-function format_gene_data(results, text_status, jqXHR, target_div, all_species) {
-
 }
 
 function format_species_name(species) {
@@ -59,9 +41,7 @@ function format_species_name(species) {
 
      if (words.length > 1) {
         species = "<i>" + words[0] + " " +words[1]+ "</i>";
-
          for (var j = 2; j < words.length; j++) {
-
               species = species + " " + words[j];
           }
      }
@@ -254,68 +234,32 @@ function format_basic_gene_data(result, text_status, jqXHR, target_div) {
     target_div.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
     var table = $('#results_table');
 
-    if ('genome' in result && 'replicon_type' in result)
+    if(result.replicon_type == "chromosome")
     {
-        if(result.replicon_type == "chromosome")
-        {
-            table.append("<tr><td> Genome </td><td><a href=\"/genomedetails/" + result.genome + "\">" + result.genome + "</a></td></tr>"); 
-        }
-        if(result.replicon_type == "plasmid")
-        {
-            table.append("<tr><td> Plasmid </td><td><a href=\"/plasmiddetails/" + result.genome + "\">" + result.genome + "</a></td></tr>"); 
-        }
+        table.append("<tr><td> Genome </td><td><a href=\"/genomedetails/" + result.genome + "\">" + result.genome + "</a></td></tr>"); 
     }
-
-    if ('organism' in result)
+    if(result.replicon_type == "plasmid")
     {
-        table.append("<tr><td> Species </td><td>" + format_species_name(result.organism) + "</td></tr>");
+        table.append("<tr><td> Plasmid </td><td><a href=\"/plasmiddetails/" + result.genome + "\">" + result.genome + "</a></td></tr>"); 
     }
+    
+    table.append("<tr><td> Species </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    table.append("<tr><td> Type </td><td>" + result.type + "</td></tr>");
+    table.append("<tr><td> Name </td><td>" + result.gene + "</td></tr>");
+    table.append("<tr><td> Location </td><td> <i>Start:</i> " + result.location.start + " <i>End:</i> " + result.location.end + " <i>Strand:</i> " + result.location.strand + "</td></tr>");
+    table.append("<tr><td> Function </td><td>" + result.function + "</td></tr>");
+    table.append("<tr><td> Product </td><td>" + result.product + "</td></tr>");
+    table.append("<tr><td> EC Number </td><td>" + result.EC_number + "</td></tr>");
+    table.append("<tr><td> Protein ID </td><td><a href=http://www.ncbi.nlm.nih.gov/protein/" + result.protein_id + ">" + result.protein_id+ "</a></td></tr>"); 
+    
+    var db_xref = result.db_xref[0];
 
-    if ('type' in result)
-    {
-        table.append("<tr><td> Type </td><td>" + result.type + "</td></tr>");
-    }
+    for (var j=1; j< result.db_xref.length; j++) {
 
-    if ('gene' in result)
-    {
-        table.append("<tr><td> Name </td><td>" + result.gene + "</td></tr>");
-    }
-
-    if ('location' in result)
-    {
-        table.append("<tr><td> Location </td><td> <i>Start:</i> " + result.location.start + " <i>End:</i> " + result.location.end + " <i>Strand:</i> " + result.location.strand + "</td></tr>");
-    }
-
-    if ('function' in result)
-    {
-        table.append("<tr><td> Function </td><td>" + result.function + "</td></tr>");
-    }
-
-    if ('product' in result)
-    {
-        table.append("<tr><td> Product </td><td>" + result.product + "</td></tr>");
-    }
-
-    if ('EC_number' in result)
-    {
-        table.append("<tr><td> EC Number </td><td>" + result.EC_number + "</td></tr>");
-    }
-
-    if ('protein_id' in result)
-    {
-
-        table.append("<tr><td> Protein ID </td><td><a href=http://www.ncbi.nlm.nih.gov/protein/" + result.protein_id + ">" + result.protein_id+ "</a></td></tr>"); 
-    }
-
-    if ('db_xref' in result)
-    {
-
-        var db_xref = result.db_xref[0];
-        for (var j=1; j< result.db_xref.length; j++) {
          db_xref = db_xref + "</br>" + result.db_xref[j];
-        }
-        table.append("<tr><td> Other database references </td><td>" + db_xref + "</td></tr>");
     }
+    table.append("<tr><td> Other database references </td><td>" + db_xref + "</td></tr>");
+    
 }
 
 function format_orthologue_data(returned_result, text_status, jqXHR, target_div) {
@@ -323,36 +267,35 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
     locus = returned_result.current_gene.locus_tag;
     target_div.append("<h3>Orthologues: " + locus + "</h3>");
 
-    var header_row = "<tr><th>Orthologue</th><th>Genome</th><th>Organism</th></tr>";
-    target_div.append("<table><thead>" + header_row + "</thead><tbody id=\"orthologues_table\"></tbody></table>");
-    var table = $('#orthologues_table');
-
     numOrthologues = returned_result.orthologues.length;
-     for (var i=0; i<numOrthologues; i++)
-     {
-             if ('genome' in returned_result.orthologues[i] && 'replicon_type' in returned_result.orthologues[i])
-            {
-                if(returned_result.orthologues[i].replicon_type == "chromosome")
-                {
 
-                    table.append("<tr><td><a href=\"/genedetails/" + returned_result.orthologues[i]._id + "\">" + 
-                                returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/genomedetails/" + 
-                                returned_result.orthologues[i].genome + "\">" + 
-                                returned_result.orthologues[i].genome + "</a></td>" +
-                                "<td>" + format_species_name(returned_result.orthologues[i].organism) + "</td></tr>"); 
-                }
-                if(returned_result.orthologues[i].replicon_type == "plasmid")
-                {
-                    table.append("<tr><td><a href=\"/genedetails/" + returned_result.orthologues[i]._id + "\">" + 
-                        returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/plasmiddetails/" + 
-                        returned_result.orthologues[i].genome + "\">" + 
-                        returned_result.orthologues[i].genome + "</a></td><td>"+
-                        format_species_name(returned_result.orthologues[i].organism)+"</td></tr>"); 
-                }
+    if (numOrthologues>0){
+
+        var header_row = "<tr><th>Orthologue</th><th>Genome</th><th>Organism</th></tr>";
+        target_div.append("<table><thead>" + header_row + "</thead><tbody id=\"orthologues_table\"></tbody></table>");
+        var table = $('#orthologues_table');
+
+         for (var i=0; i<numOrthologues; i++){
+
+            if(returned_result.orthologues[i].replicon_type == "chromosome"){
+                table.append("<tr><td><a href=\"/genedetails/" + returned_result.orthologues[i]._id + "\">" + 
+                    returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/genomedetails/" + 
+                    returned_result.orthologues[i].genome + "\">" + 
+                    returned_result.orthologues[i].genome + "</a></td><td>" + 
+                    format_species_name(returned_result.orthologues[i].organism) + "</td></tr>"); 
             }
-
-
-     }
+            if(returned_result.orthologues[i].replicon_type == "plasmid"){
+                table.append("<tr><td><a href=\"/genedetails/" + returned_result.orthologues[i]._id + "\">" + 
+                    returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/plasmiddetails/" + 
+                    returned_result.orthologues[i].genome + "\">" + 
+                    returned_result.orthologues[i].genome + "</a></td><td>"+
+                    format_species_name(returned_result.orthologues[i].organism)+"</td></tr>"); 
+            }
+         }
+    }
+    else{
+        target_div.append("<a>No orthologues found.</a>")
+    }
 
 
 }
@@ -496,7 +439,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         ctx.fillText(gene_plot[i].locus_tag, gene_plot[i].x, -(gene_plot[i].y+15));
         ctx.scale(1,-1);
 
-        ctx.fillStyle = "rgb(200,0,0)";//change colour so that orthlogues arae red
+        ctx.fillStyle = "rgb(200,0,0)";//change colour so that orthlogues are red
       }
     }
 
