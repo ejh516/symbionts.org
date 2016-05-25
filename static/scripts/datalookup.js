@@ -62,8 +62,6 @@ function format_gene_data(results, text_status, jqXHR, target_div, all_species) 
 
 function format_species_name(species) {
 
-     //alert("Formatting species: " + species)
-
      var words = species.split(" ");
 
      if (words.length > 1) {
@@ -75,7 +73,6 @@ function format_species_name(species) {
           }
      }
 
-     //alert("Finished formatting species: " + species)
     return species;
 }
 
@@ -349,7 +346,7 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
                                 returned_result.orthologues[i].locus_tag + "</a></td><td><a href=\"/genomedetails/" + 
                                 returned_result.orthologues[i].genome + "\">" + 
                                 returned_result.orthologues[i].genome + "</a></td>" +
-                                "<td>" + returned_result.orthologues[i].organism + "</td></tr>"); 
+                                "<td>" + format_species_name(returned_result.orthologues[i].organism) + "</td></tr>"); 
                 }
                 if(returned_result.orthologues[i].replicon_type == "plasmid")
                 {
