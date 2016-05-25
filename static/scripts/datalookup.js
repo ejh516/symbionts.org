@@ -23,16 +23,9 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
         for (var i=0; i < result.results.length; i++) {
             feature = result.results[i];
 
-            if (feature.type == "gene")// TO DO: figure out why (for genes only - not CDSs) if you put locus_tag here you can't click on the link. 
-            {
-                var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature._id+ "</a></td>";
-            }
-
-            else if (feature.hasOwnProperty('locus_tag'))
-            {
-                var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag + "</a></td>";
-            }
-            else {
+            if (feature.hasOwnProperty('locus_tag')) {
+                var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag[0] + "</a></td>";
+            } else {
                 row_cells = row_cells + "<td></td>"; //some features may not have locus_tags?
             }
 
