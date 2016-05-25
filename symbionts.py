@@ -262,9 +262,9 @@ def get_genome_info():
             #for each genome, count the number of pseudogenes in the features collection
             result["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': result["_id"]}).count()
             #for each genome, count the number of tRNAs in the features collection
-            result["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
+            result["numTRNAs"]= features.find({'type': 'tRNA', 'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             #for each genome, count the number of rRNAs in the features collection
-            result["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
+            result["numRRNAs"]= features.find({'type': 'rRNA', 'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             raw_results.append(result)
    
         results['results'] = raw_results
