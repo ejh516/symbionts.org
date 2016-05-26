@@ -64,39 +64,14 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
 
         for (var i=0; i < result.results.length; i++) {
             genome = result.results[i];
-            var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td>";
-
-            if ('organism' in genome)
-            {
+            var row_cells = "<td><a href=\"/genomedetails/" + genome._id + "\">" + genome._id + "</a></td>";       
                 row_cells = row_cells + "<td>" + format_species_name(genome.organism) + "</td>";
-            }
-            else
-            {
-              row_cells = row_cells + "<td> Not found.</td>";  
-            }
-
-            if ('taxonomy' in genome)
-            {
                 var tax = genome.taxonomy[0];
                 for (var j=1; j< genome.taxonomy.length; j++) {
                  tax = tax + "</br>" + genome.taxonomy[j];
                 }
-                row_cells = row_cells + "<td>" + tax + "</td>";
-            }
-            else
-            {
-              row_cells = row_cells + "<td> Not found.</td>";  
-            } 
-            
-            if ('plasmids' in genome)
-            {
-                row_cells = row_cells + "<td>" + genome.plasmids.length + "</td>";
-            } 
-            else 
-            {
-                row_cells = row_cells + "<td>0</td>";
-            }
-
+            row_cells = row_cells + "<td>" + tax + "</td>";
+            row_cells = row_cells + "<td>" + genome.numPlasmids + "</td>";
             row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes +"</td><td>" + genome.numTRNAs + "</td><td>" + genome.numRRNAs + "</td>";
             table.append("<tr>" + row_cells + "</tr>");
                        
@@ -112,33 +87,25 @@ function format_genome_data(result, text_status, jqXHR, target_div_details, targ
     target_div_details.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
     var table = $('#results_table');
     table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
-
-    if ('organism' in result)
-    {
-        table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
-    }
-
-    if ('taxonomy' in result)
-    {
-        var tax = result.taxonomy[0];
-        for (var j=1; j< result.taxonomy.length; j++) {
+    table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    
+    var tax = result.taxonomy[0];
+    for (var j=1; j< result.taxonomy.length; j++) {
             tax = tax + "</br>" + result.taxonomy[j];
-            }
-        table.append("<tr><td> Taxonomy </td><td>" + tax + "</td></tr>");
     }
+    table.append("<tr><td> Taxonomy </td><td>" + tax + "</td></tr>");
 
-  
-    if ('plasmids' in result)
+    if (result['plasmids'].length>0)
     {
-       var plasmids = "<a href=\"/plasmiddetails/" + result.plasmids[0] + "\">" + result.plasmids[0] + "</a>";
+        var plasmids = "<a href=\"/plasmiddetails/" + result.plasmids[0] + "\">" + result.plasmids[0] + "</a>";
         for (var j=1; j< result.plasmids.length; j++) {
-            plasmids = plasmids + "</br><a href=\"/plasmiddetails/" + result.plasmids[j] + "\">" + result.plasmids[j] + "</a>";
-        } 
+                plasmids = plasmids + "</br><a href=\"/plasmiddetails/" + result.plasmids[j] + "\">" + result.plasmids[j] + "</a>";
+        }
     } 
-    else
-    {
-        var plasmids = "None";
+    else{
+        var plasmids = "None.";
     }
+    
     table.append("<tr><td> Plasmids </td><td>" + plasmids + "</td></tr>");
     table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
     table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
@@ -150,9 +117,9 @@ function format_genome_data(result, text_status, jqXHR, target_div_details, targ
     target_div_references.append("<h3>References</h3>");
     target_div_references.append("<table><thead><tbody id=\"ref_table\"></tbody></table>");
     var ref_table = $('#ref_table');
-     if ('references' in result)
+     if (result['references'].length>0)
     {
-        ref_table.append(getReferenceList(result));
+        ref_table.append(getReferenceList(result['references']));
     }
 }
 
@@ -164,20 +131,13 @@ function format_plasmid_data(result, text_status, jqXHR, target_div_plasmid_deta
     target_div_plasmid_details.append("<table><thead><tbody id=\"results_table\"></tbody></table>");
     var table = $('#results_table');
     table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
-
-    if ('organism' in result)
-    {
-        table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
-    }
-
-    if ('parent_chromosome' in result)
-    {
-        table.append("<tr><td> Parent chromosome </td><td><a href=\"/genomedetails/" + result.parent_chromosome + "\">" + result.parent_chromosome + "</a></td></tr>"); 
-    }
-
+    table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    table.append("<tr><td> Parent chromosome </td><td><a href=\"/genomedetails/" + result.parent_chromosome + "\">" + result.parent_chromosome + "</a></td></tr>"); 
     table.append("<tr><td> No. Genes </td><td>" + result.numGenes + "</td></tr>");
     table.append("<tr><td> No. CDSs </td><td>" + result.numCDSs + "</td></tr>");
     table.append("<tr><td> No. Pseudogenes </td><td>" + result.numPseudogenes + "</td></tr>");
+
+    //not sure if plasmids will have tRNAs and rRNAs - check later
     table.append("<tr><td> No. tRNAs </td><td>" + result.numTRNAs + "</td></tr>");
     table.append("<tr><td> No. rRNAs </td><td>" + result.numRRNAs + "</td></tr>");
 
@@ -185,39 +145,20 @@ function format_plasmid_data(result, text_status, jqXHR, target_div_plasmid_deta
     target_div_plasmid_references.append("<h3>References</h3>");
     target_div_plasmid_references.append("<table><thead><tbody id=\"ref_table\"></tbody></table>");
     var ref_table = $('#ref_table');
-     if ('references' in result)
+     if (result['references'].length>0)
     {
-        ref_table.append(getReferenceList(result));
+        ref_table.append(getReferenceList(result['references']));
     }
 }
 
-function getReferenceList(result)
+function getReferenceList(refs)
 {
     var refList = "";
-    for (var j=0; j< result.references.length; j++) {
-
-             var ref = "";
-             if ('authors' in result.references[j])
-             {
-                ref = ref + result.references[j].authors +". ";
-             }
-
-             if ('title' in result.references[j])
-             {
-                ref = ref + result.references[j].title +". ";
-             }
-
-             if ('journal' in result.references[j])
-             {
-                ref = ref + result.references[j].journal;
-             }
-             if ('pubmed_id' in result.references[j])
-             {
-                ref = ref + ". PubMed ID: " + result.references[j].pubmed_id;
-             }
-             refList = refList + "<tr><td>" + ref + "</td></tr>";       
+    for (var j=0; j< refs.length; j++) {
+        r = refs[j].authors +". "+ refs[j].title +". "+ refs[j].journal + ". PubMed ID: " + refs[j].pubmed_id;
+        refList = refList + "<tr><td>" + r + "</td></tr>";       
         }
-        return refList;
+    return refList;
 }
 
 function format_basic_gene_data(result, text_status, jqXHR, target_div) {
