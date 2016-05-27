@@ -244,23 +244,47 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
 
 function format_genomic_context_data(result, text_status, jqXHR, target_div, target_canvas) {
 
-    locus = result.current_gene.locus_tag;
-    target_div.append("<h3>" + locus + "</h3>");
-    
-    start = parseInt(result.current_gene.start)
-    end = parseInt(result.current_gene.end)
-    size = (end - start)/10
+    function Gene(id, locus_tag, start, end, strand) {
+        this.id = id;
+        this.locus_tag = locus_tag;  
+        this.start = start;
+        this.end = end;
+        this.length = end-start;
+        this.strand = strand;
+    }
 
-    var gene_plot = [{x: 0, y: 300, length: size, locus_tag: locus, strand: result.current_gene.strand }]
+    Gene.prototype.draw = function(context){
+        
+        context.fillStyle = "rgb(0,0,0)";
+        context.fillRect(0,100,this.length/10,20);
+        context.fillStyle = "rgb(200,0,0)";
+        context.font="20px Helvetica";
+        context.fillText(this.locus_tag, 0,20)
 
+    }
+
+    function Genome(id, organism, genes) {
+        this.id = id;
+        this.organism = organism;
+        this.genes = genes;
+    }
+
+    var geneList = [];
+
+    var currentGene = new Gene(result.current_gene.id, result.current_gene.locus_tag, parseInt(result.current_gene.start), parseInt(result.current_gene.end), result.current_gene.strand);
+
+    geneList.push(currentGene);
+
+    target_div.append("<h3>" + currentGene.locus_tag + "</h3>");
+   
     numOrthologues = result.orthologues.length;
+
      for (i=0; i<numOrthologues; i++)
      {
-            start = parseInt(result.orthologues[i].start)
-            end = parseInt(result.orthologues[i].end)
-            size = (end - start)/10
-            gene_plot.push({x:0, y: 300-((i+1)*100), length: size, locus_tag:result.orthologues[i].locus_tag, strand: result.orthologues[i].strand })
+            var anOrthologue = new Gene(result.orthologues[i].id, result.orthologues[i].locus_tag, parseInt(result.orthologues[i].start), parseInt(result.orthologues[i].end), result.orthologues[i].strand);
+            geneList.push(anOrthologue);        
      }
+
 
     var can = target_canvas,
       ctx = can.getContext('2d'),
@@ -270,11 +294,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       scale_factor = 1.0,
       scale = 1.0;
 
-    var grid = (function(dX, dY){
-        var can = document.createElement("canvas"),
-        ctx = can.getContext('2d');
-        can.width = dX;
-        can.height = dY;
+      can.height = 100+(numOrthologues*100);
+
+
+     var grid = (function(dX, dY){
+        var c = document.createElement("canvas"),
+        ctx = c.getContext('2d');
+        c.width = dX;
+        c.height = dY;
 
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, dX, dY);
@@ -288,7 +315,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         ctx.lineTo(.5, dY + .5);
         ctx.stroke();
   
-        return ctx.createPattern(can, 'repeat');
+        return ctx.createPattern(c, 'repeat');
         })(500, 100);
 
     ctx.scale(1, -1);
@@ -368,19 +395,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       ctx.rect(-translated, 0, 600, 400);
       ctx.fillStyle = grid;
       ctx.fill();
-      ctx.fillStyle = "rgb(0,0,0)";
-      ctx.font="20px Helvetica";
-      for (var i = 0; i < gene_plot.length; i++) 
+       for (var i = 0; i < geneList.length; i++) 
       {
-        ctx.beginPath();
-        
-        ctx.fillRect (gene_plot[i].x, gene_plot[i].y-10, gene_plot[i].length, 20);
-        ctx.fillStyle = "rgb(0,0,0)";
-        ctx.scale(1,-1);
-        ctx.fillText(gene_plot[i].locus_tag, gene_plot[i].x, -(gene_plot[i].y+15));
-        ctx.scale(1,-1);
 
-        ctx.fillStyle = "rgb(200,0,0)";//change colour so that orthlogues are red
+        geneList[0].draw(ctx);
+
       }
     }
 
