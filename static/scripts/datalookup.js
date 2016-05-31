@@ -242,7 +242,27 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
 }
 
 
+
 function format_genomic_context_data(result, text_status, jqXHR, target_div, target_canvas) {
+
+    //MODEL SECTION...?
+
+    function Model (genomeList){
+      this.genomeList = genomeList; 
+
+    }
+
+    function Genome(id, organism, genesForDisplay) {
+        this.id = id;
+        this.organism = organism;
+        this.genesForDisplay = genesForDisplay;
+    }
+
+    Genome.prototype.addGene = function(id, locus_tag, start, end, strand)
+    {
+        aGene = new Gene(id, locus_tag, start, end, strand);
+        this.genesForDisplay.push(aGene);
+    }
 
     function Gene(id, locus_tag, start, end, strand) {
         this.id = id;
@@ -253,37 +273,82 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.strand = strand;
     }
 
-    Gene.prototype.draw = function(context){
-        
-        context.fillStyle = "rgb(0,0,0)";
-        context.fillRect(0,100,this.length/10,20);
+    Gene.prototype.draw = function(context, start_y, fillStyle){       
+        context.fillStyle = fillStyle;
+        context.fillRect(this.start,start_y,this.length,20);
         context.fillStyle = "rgb(200,0,0)";
-        context.font="20px Helvetica";
-        context.fillText(this.locus_tag, 0,20)
+        context.font="10px Helvetica";
+        context.scale(1,-1);
+        context.fillText(this.locus_tag, this.start,-(start_y+30));
+        context.scale(1,-1);
+
+        //alert("Drawn gene at: " + this.start + ", "+start_y);
 
     }
 
-    function Genome(id, organism, genes) {
-        this.id = id;
-        this.organism = organism;
-        this.genes = genes;
+    Model.prototype.addGenome = function(id, organism, genesForDisplay){
+
+        geneList = [];
+
+        aGenome = new Genome(id, organism, geneList);
+
+        for (var j=0; j< genesForDisplay.length; j++) {
+
+            aGenome.addGene(genesForDisplay[j].id, genesForDisplay[j].locus_tag, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
+        }
+
+        this.genomeList.push(aGenome);
+
     }
 
-    var geneList = [];
 
-    var currentGene = new Gene(result.current_gene.id, result.current_gene.locus_tag, parseInt(result.current_gene.start), parseInt(result.current_gene.end), result.current_gene.strand);
 
-    geneList.push(currentGene);
+    //CONTROLLER SECTION...
 
-    target_div.append("<h3>" + currentGene.locus_tag + "</h3>");
-   
+    //make a model
+    var genomeList = [];
+
+    var theModel = new Model(genomeList);
+
+    function getGeneList(genome_ID, start_pos, end_pos){
+
+        $.ajax({
+                "url": "/gene_context_info/" + genome_ID +"/" + start_pos+ "/" +end_pos, 
+                "success": function(data, status_text, jqXHR) {
+                                    format_gene_list(data, status_text, jqXHR);
+                           },
+                "dataType": 'json'
+               });
+        
+    }
+
+
+    function format_gene_list(returnedGeneList, status_text, jqXHR){
+
+    theModel.addGenome(returnedGeneList._id, returnedGeneList.organism, returnedGeneList.geneList);
+
+    }
+
+    target_div.append("<h3>" + result.current_gene.locus_tag + "</h3>");
+
+    //get the list of neighbouring genes to display for the current gene's genome (from -5kb to +5kb on intial load)
+    getGeneList(result.current_gene.genome, parseInt(result.current_gene.start)-5000, parseInt(result.current_gene.start)+5000);
+
+
     numOrthologues = result.orthologues.length;
 
-     for (i=0; i<numOrthologues; i++)
-     {
-            var anOrthologue = new Gene(result.orthologues[i].id, result.orthologues[i].locus_tag, parseInt(result.orthologues[i].start), parseInt(result.orthologues[i].end), result.orthologues[i].strand);
-            geneList.push(anOrthologue);        
+    //get the list of neighbouring genes to display for eachh of the orthologues
+    for (var i=0; i<numOrthologues; i++){
+         getGeneList(result.orthologues[i].genome, parseInt(result.current_gene.start)-5000, parseInt(result.current_gene.start)-5000);   
      }
+
+
+    //N.B code going here may be executed before the genomes have been added to model...
+
+
+
+
+    //VIEW SECTION...
 
 
     var can = target_canvas,
@@ -342,21 +407,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         dragging = false;
     }
 
-    window.addEventListener("mousewheel", mouseWheelHandler, false);
+    can.addEventListener("mousewheel", mouseWheelHandler, false);
 
     function mouseWheelHandler(e){
 
-    var mousex = e.clientX - can.offsetLeft;
-    var mousey = e.clientY - can.offsetTop;
-
-    if (mousex<=can.width && mousex>0 && mousey<=can.height && mousey>0)// check if cursor is within canvas
-    {
-
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-
-        // var wheel = event.wheelDelta/120;//n or -n
-        // var zoom = 1 + wheel/2;
-        // scale_factor *= zoom;
 
         draw(scale_factor);
         if (delta < 0) { 
@@ -372,12 +427,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         }
 
         return false;
-    }
+
     }
 
+    draw();
 
-    function draw() {
-     
+    function draw() {     
         //fix scaling
       if (scale_factor<1 && scale <=1 ) //can't zoom out anymore
       {
@@ -395,17 +450,26 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       ctx.rect(-translated, 0, 600, 400);
       ctx.fillStyle = grid;
       ctx.fill();
-       for (var i = 0; i < geneList.length; i++) 
-      {
 
-        geneList[0].draw(ctx);
+      for (var i = 0; i < theModel.genomeList.length; i++) {
+
+        redColour = i*100;
+
+           fillStyle = "rgb(" + redColour + ",0,0)";
+
+            for (var j = 0; j < theModel.genomeList[i].genesForDisplay.length; j++) {
+  
+            
+                theModel.genomeList[i].genesForDisplay[j].draw(ctx, 100+(i*100), fillStyle); //get gene to draw itself, given y coordinate
+
+          }
 
       }
+    
+
+    setInterval(draw,100); 
+
     }
-
-    setInterval(draw,100);
-
-
 
 }
     

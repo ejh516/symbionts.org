@@ -237,6 +237,29 @@ def get_orthologues_by_ID(gene_id):
     return jsonify(results)
 
 
+@app.route("/gene_context_info/<genome_id>/<start_pos>/<end_pos>")
+def get_neighbouring_genes(genome_id, start_pos, end_pos):
+
+    genome = db.genome
+    features = db.genome.features
+  
+    result = genome.find_one({"_id": genome_id}, {"sequence":0})
+
+    gene1 = {"_id": "Feature ID 1", "locus_tag": genome_id + "locus_tag1", "start": "100", "end":"200", "strand": "1"}
+    gene2 = {"_id": "Feature ID 2", "locus_tag": genome_id + "locus_tag2", "start": "300", "end":"450", "strand": "-1"}
+    gene3 = {"_id": "Feature ID 3", "locus_tag": genome_id + "locus_tag3", "start": "700", "end":"900", "strand": "1"}
+
+    geneList = []
+
+    geneList.append(gene1)
+    geneList.append(gene2)
+    geneList.append(gene3)
+
+    aResult = {"_id":"Genome ID", "organism": "anOrganism", "geneList":geneList}
+
+    return jsonify(aResult)
+
+
 @app.route("/genome_info")
 def get_genome_info():
     
