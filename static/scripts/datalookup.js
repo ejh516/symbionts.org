@@ -275,14 +275,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     Gene.prototype.draw = function(context, start_y, fillStyle){       
         context.fillStyle = fillStyle;
-        context.fillRect(this.start,start_y,this.length,20);
+        context.fillRect(this.start/10,start_y,this.length/10,20);
         context.fillStyle = "rgb(200,0,0)";
         context.font="10px Helvetica";
         context.scale(1,-1);
-        context.fillText(this.locus_tag, this.start,-(start_y+30));
+        context.fillText(this.locus_tag, this.start/10,-(start_y+30));
         context.scale(1,-1);
-
-        //alert("Drawn gene at: " + this.start + ", "+start_y);
 
     }
 
@@ -308,7 +306,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     //make a model
     var genomeList = [];
 
-    var theModel = new Model(genomeList);
+    theModel = new Model(genomeList);
 
     function getGeneList(genome_ID, start_pos, end_pos){
 
@@ -325,26 +323,31 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function format_gene_list(returnedGeneList, status_text, jqXHR){
 
-    theModel.addGenome(returnedGeneList._id, returnedGeneList.organism, returnedGeneList.geneList);
+        theModel.addGenome(returnedGeneList._id, returnedGeneList.organism, returnedGeneList.geneList);
 
     }
 
     target_div.append("<h3>" + result.current_gene.locus_tag + "</h3>");
 
-    //get the list of neighbouring genes to display for the current gene's genome (from -5kb to +5kb on intial load)
-    getGeneList(result.current_gene.genome, parseInt(result.current_gene.start)-5000, parseInt(result.current_gene.start)+5000);
+    
+    function refreshGeneLists(start_pos, end_pos){
+            //get the list of neighbouring genes to display for the current gene's genome 
+            getGeneList(result.current_gene.genome, start_pos,end_pos) ;
 
+            numOrthologues = result.orthologues.length;
 
-    numOrthologues = result.orthologues.length;
+            //get the list of neighbouring genes to display for eachh of the orthologues
+            for (var i=0; i<numOrthologues; i++){
+                 getGeneList(result.orthologues[i].genome, start_pos, end_pos);   
+             }
 
-    //get the list of neighbouring genes to display for eachh of the orthologues
-    for (var i=0; i<numOrthologues; i++){
-         getGeneList(result.orthologues[i].genome, parseInt(result.current_gene.start)-5000, parseInt(result.current_gene.start)-5000);   
-     }
+    }
 
+    //initial start and end positions -5kb to 5kb
+    start_position = parseInt(result.current_gene.start)-5000;
+    end_position = parseInt(result.current_gene.start)+5000;
 
-    //N.B code going here may be executed before the genomes have been added to model...
-
+    refreshGeneLists(start_position, end_position);
 
 
 
@@ -360,6 +363,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       scale = 1.0;
 
       can.height = 100+(numOrthologues*100);
+      can.width = 1000;
 
 
      var grid = (function(dX, dY){
@@ -399,6 +403,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             translated += delta;
             ctx.translate(delta, 0);
             lastX = evt.offsetX;
+            // start_position = start_position + (delta*100);
+            // end_position = end_position + (delta*100);
+            // refreshGeneLists(start_position, end_position);
             draw();
             }
     }
@@ -448,6 +455,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
       ctx.clearRect(-translated, 0, can.width, can.height+100);
       ctx.rect(-translated, 0, can.width, can.height+100);
+
+      // ctx.clearRect(start_position, 0, can.width, can.height+100);
+      // ctx.rect(start_position, 0, can.width, can.height+100);
+
       ctx.fillStyle = grid;
       ctx.fill();
 
@@ -460,8 +471,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             for (var j = 0; j < theModel.genomeList[i].genesForDisplay.length; j++) {
 
-                y_coord = 40+ can.height - (i*100);
-                //y_coord = (140+(i*100));
+                y_coord = 40 + can.height - (i*100);
 
                 theModel.genomeList[i].genesForDisplay[j].draw(ctx, y_coord, fillStyle); //get gene to draw itself, given y coordinate
 

@@ -104,7 +104,7 @@ def full_text_search(genome, search_text):
     if results['hit_count'] > 0:
         raw_results = []
         for result in features_cursor:
-            aResult = {"_id": "Undefined.","genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined."}
+            aResult = {"_id": "Undefined.","genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined.", "organism": "Undefined."}
             if '_id' in result:
                 aResult["_id"] = str(result['_id'])
             if 'genome' in result:
@@ -242,20 +242,34 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
 
     genome = db.genome
     features = db.genome.features
-  
-    result = genome.find_one({"_id": genome_id}, {"sequence":0})
 
-    gene1 = {"_id": "Feature ID 1", "locus_tag": genome_id + "locus_tag1", "start": "100", "end":"200", "strand": "1"}
-    gene2 = {"_id": "Feature ID 2", "locus_tag": genome_id + "locus_tag2", "start": "300", "end":"450", "strand": "-1"}
-    gene3 = {"_id": "Feature ID 3", "locus_tag": genome_id + "locus_tag3", "start": "700", "end":"900", "strand": "1"}
+    # results = features.find({"genome": genome_id, "$or":[{"location.start":{"$lt":int(end_pos), "$gt":int(start_pos)}},{"location.end":{"$lt":int(end_pos), "$gt":int(start_pos)}}]})
+
+    results = features.find({"genome": genome_id, "$or":[{"location.start":{"$lt":10000, "$gt":1}},{"location.end":{"$lt":10000, "$gt":1}}]}) # temporary fix just to look at beginning of genome
 
     geneList = []
 
-    geneList.append(gene1)
-    geneList.append(gene2)
-    geneList.append(gene3)
+    for aGene in results:
 
-    aResult = {"_id":"Genome ID", "organism": "anOrganism", "geneList":geneList}
+        aResult = {"_id": "Undefined.","locus_tag": "Undefined.", "type": "Undefined", "start": "-1", "end": "-1", "strand":"0"}
+        if '_id' in aGene:
+            aResult["_id"] = str(aGene['_id'])
+        if 'locus_tag' in aGene:
+            aResult["locus_tag"] = aGene['locus_tag']
+        if 'type' in aGene:
+            aResult["type"] = aGene['type']
+        if 'location' in aGene:
+            if 'start' in aGene['location']:
+                aResult["start"] = aGene["location"]["start"]
+            if 'end' in aGene['location']:
+                aResult["end"] = aGene["location"]["end"]
+            if 'strand' in aGene['location']:
+                aResult["strand"] = aGene["location"]["strand"]
+
+        geneList.append(aResult)
+
+
+    aResult = {"_id":genome_id, "organism": "anOrganism", "geneList":geneList}
 
     return jsonify(aResult)
 
