@@ -273,13 +273,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.strand = strand;
     }
 
-    Gene.prototype.draw = function(context, start_y, fillStyle){       
+    Gene.prototype.draw = function(context, x_offset, start_y, fillStyle){       
         context.fillStyle = fillStyle;
-        context.fillRect(this.start/10,start_y,this.length/10,20);
+        context.fillRect((this.start-x_offset)/10,start_y,this.length/10,20);
         context.fillStyle = "rgb(200,0,0)";
         context.font="10px Helvetica";
         context.scale(1,-1);
-        context.fillText(this.locus_tag, this.start/10,-(start_y+30));
+        context.fillText(this.locus_tag, (this.start-x_offset)/10,-(start_y+30));
         context.scale(1,-1);
 
     }
@@ -344,6 +344,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     }
 
     //initial start and end positions -5kb to 5kb
+    current_gene_start = result.current_gene.start;
     start_position = parseInt(result.current_gene.start)-5000;
     end_position = parseInt(result.current_gene.start)+5000;
 
@@ -453,11 +454,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
           scale_factor = 1.0;//reset scale_factor after scaling
         }
 
+      // ctx.clearRect(-translated, 0, can.width, can.height+100);
+      // ctx.rect(-translated, 0, can.width, can.height+100);
+
       ctx.clearRect(-translated, 0, can.width, can.height+100);
       ctx.rect(-translated, 0, can.width, can.height+100);
-
-      // ctx.clearRect(start_position, 0, can.width, can.height+100);
-      // ctx.rect(start_position, 0, can.width, can.height+100);
 
       ctx.fillStyle = grid;
       ctx.fill();
@@ -473,7 +474,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                 y_coord = 40 + can.height - (i*100);
 
-                theModel.genomeList[i].genesForDisplay[j].draw(ctx, y_coord, fillStyle); //get gene to draw itself, given y coordinate
+                theModel.genomeList[i].genesForDisplay[j].draw(ctx, current_gene_start-5000, y_coord, fillStyle); //get gene to draw itself, given y coordinate
 
           }
 
