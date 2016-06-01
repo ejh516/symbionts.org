@@ -25,7 +25,7 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
             var row_cells = "<td><a href=\"/genedetails/" + feature._id + "\">" + feature.locus_tag + "</a></td>";
             row_cells = row_cells + "<td>" + feature.gene + "</td>";
             row_cells = row_cells + "<td>" + feature.type + "</td>"
-            if (result.genome == 'all') {
+            if (result.genome == 'all' && feature.genome in all_species) {
                var species_name = format_species_name(all_species[feature.genome]);
                row_cells = row_cells + "<td>" + species_name + "</td>";
             }
@@ -372,8 +372,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         ctx.fillRect(0, 0, dX, dY);
 
         ctx.strokeStyle = 'black';
-        ctx.moveTo(.5, 0.5);
-        ctx.lineTo(dX + .5, 0.5);
+        ctx.moveTo(.5, dY/2);
+        ctx.lineTo(dX + .5, dY/2);
         ctx.stroke();
 
         ctx.moveTo(.5, .5);
@@ -384,7 +384,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         })(500, 100);
 
     ctx.scale(1, -1);
-    ctx.translate(0, -400);
+    ctx.translate(0, -(can.height+100));
 
     can.onmousedown = function (e) {
         var evt = e || event;
@@ -446,10 +446,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
           scale_factor = 1.0;//reset scale_factor after scaling
         }
 
-      ctx.clearRect(-translated, 0, 600, 400);
-      ctx.rect(-translated, 0, 600, 400);
+      ctx.clearRect(-translated, 0, can.width, can.height+100);
+      ctx.rect(-translated, 0, can.width, can.height+100);
       ctx.fillStyle = grid;
       ctx.fill();
+
 
       for (var i = 0; i < theModel.genomeList.length; i++) {
 
@@ -458,9 +459,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
            fillStyle = "rgb(" + redColour + ",0,0)";
 
             for (var j = 0; j < theModel.genomeList[i].genesForDisplay.length; j++) {
-  
-            
-                theModel.genomeList[i].genesForDisplay[j].draw(ctx, 100+(i*100), fillStyle); //get gene to draw itself, given y coordinate
+
+                y_coord = 40+ can.height - (i*100);
+                //y_coord = (140+(i*100));
+
+                theModel.genomeList[i].genesForDisplay[j].draw(ctx, y_coord, fillStyle); //get gene to draw itself, given y coordinate
 
           }
 
