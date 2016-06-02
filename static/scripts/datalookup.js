@@ -252,11 +252,21 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    function Genome(id, organism, genesForDisplay) {
+    function Genome(id, genesForDisplay) {
         this.id = id;
-        this.organism = organism;
         this.genesForDisplay = genesForDisplay;
+        this.gene_of_interest_start_point = null;
     }
+
+    Genome.prototype.draw = function(context, start_y, fillStyle){       
+
+        for (var j=0; j< this.genesForDisplay.length; j++) {
+
+          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-5000, start_y, fillStyle); //fix this! 5000 shouldn't be there - start position
+        }
+
+    }
+
 
     Genome.prototype.addGene = function(id, locus_tag, start, end, strand)
     {
@@ -284,16 +294,27 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    Model.prototype.addGenome = function(id, organism, genesForDisplay){
+
+    Model.prototype.refreshGenome = function(id, genesForDisplay){
+
+        for (var i = 0; i<this.genomeList.length; i++){
+            if(this.genomeList[i].id == id){
+                this.genomeList[i].geneList = [];
+                for (var j=0; j< genesForDisplay.length; j++) {
+                    this.genomeList[i].addGene(genesForDisplay[j].id, genesForDisplay[j].locus_tag, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
+            }
+            }
+        }
+    }
+
+
+    Model.prototype.createGenome = function (id, gene_of_interest_start_point){
 
         geneList = [];
 
-        aGenome = new Genome(id, organism, geneList);
+        aGenome = new Genome(id, geneList);
 
-        for (var j=0; j< genesForDisplay.length; j++) {
-
-            aGenome.addGene(genesForDisplay[j].id, genesForDisplay[j].locus_tag, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
-        }
+        aGenome.gene_of_interest_start_point = gene_of_interest_start_point;
 
         this.genomeList.push(aGenome);
 
@@ -323,32 +344,48 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function format_gene_list(returnedGeneList, status_text, jqXHR){
 
-        theModel.addGenome(returnedGeneList._id, returnedGeneList.organism, returnedGeneList.geneList);
+        theModel.refreshGenome(returnedGeneList._id, returnedGeneList.geneList); 
+
+    }
+
+    
+    function refreshGeneLists(start_pos, end_pos){
+
+
+            for (var i = 0; i<theModel.genomeList.length; i++){
+
+                getGeneList(theModel.genomeList[i].id, theModel.genomeList[i].gene_of_interest_start_point + start_pos, theModel.genomeList[i].gene_of_interest_start_point + end_pos)
+            }
+
+
+
+    }
+
+    function createGenomes(numOrthologues){
+
+        theModel.createGenome(result.current_gene.genome, result.current_gene.start);
+
+        for (var i=0; i<numOrthologues; i++){
+            theModel.createGenome(result.orthologues[i].genome, result.orthologues[i].start);
+
+        }
 
     }
 
     target_div.append("<h3>" + result.current_gene.locus_tag + "</h3>");
 
-    
-    function refreshGeneLists(start_pos, end_pos){
-            //get the list of neighbouring genes to display for the current gene's genome 
-            getGeneList(result.current_gene.genome, start_pos,end_pos) ;
 
-            numOrthologues = result.orthologues.length;
+    //first create the genomes
 
-            //get the list of neighbouring genes to display for eachh of the orthologues
-            for (var i=0; i<numOrthologues; i++){
-                 getGeneList(result.orthologues[i].genome, start_pos, end_pos);   
-             }
+    start_position = -5000;
+    end_position = 5000;
+    numOrthologues = result.orthologues.length;
 
-    }
+
+    createGenomes(numOrthologues);
 
     //initial start and end positions -5kb to 5kb
-    current_gene_start = result.current_gene.start;
-    start_position = parseInt(result.current_gene.start)-5000;
-    end_position = parseInt(result.current_gene.start)+5000;
-
-    refreshGeneLists(start_position, end_position);
+    refreshGeneLists(start_position,end_position);
 
 
 
@@ -454,8 +491,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
           scale_factor = 1.0;//reset scale_factor after scaling
         }
 
-      // ctx.clearRect(-translated, 0, can.width, can.height+100);
-      // ctx.rect(-translated, 0, can.width, can.height+100);
 
       ctx.clearRect(-translated, 0, can.width, can.height+100);
       ctx.rect(-translated, 0, can.width, can.height+100);
@@ -466,17 +501,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
       for (var i = 0; i < theModel.genomeList.length; i++) {
 
-        redColour = i*100;
+         redColour = i*100;
 
-           fillStyle = "rgb(" + redColour + ",0,0)";
+        fillStyle = "rgb(" + redColour + ",0,0)";
 
-            for (var j = 0; j < theModel.genomeList[i].genesForDisplay.length; j++) {
+        y_coord = 40 + can.height - (i*100);
 
-                y_coord = 40 + can.height - (i*100);
+        theModel.genomeList[i].draw(ctx,y_coord, fillStyle);
 
-                theModel.genomeList[i].genesForDisplay[j].draw(ctx, current_gene_start-5000, y_coord, fillStyle); //get gene to draw itself, given y coordinate
-
-          }
 
       }
     
