@@ -130,7 +130,7 @@ def get_gene_by_ID(gene_id):
 
     features = db.genome.features
     genome = db.genome
-    aResult = {"_id": gene_id,"genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined.", "replicon_type": "Undefined.", "organism": "Undefined.", "location": {"start":"0","end":"0","strand":"Undefined."},"EC_number": "Undefined.","protein_id": "Undefined.","db_xref": [], "function": "Undefined."}
+    aResult = {"_id": gene_id,"genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined.", "replicon_type": "Undefined.", "organism": "Undefined.", "location": {"start":"0","end":"0","strand":"Undefined."},"EC_number": "Undefined.","protein_id": "Undefined.","db_xref": ["Undefined."], "function": "Undefined."}
 
     result = features.find_one({"_id": oid}, {"translation":0})
 

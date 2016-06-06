@@ -286,11 +286,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     Gene.prototype.draw = function(context, x_offset, start_y, fillStyle){       
         context.fillStyle = fillStyle;
         context.fillRect((this.start-x_offset)/10,start_y,this.length/10,20);
-        context.fillStyle = "rgb(200,0,0)";
+        context.fillStyle = "rgb(0,0,0)";
         context.font="10px Helvetica";
-        context.scale(1,-1);
-        context.fillText(this.locus_tag, (this.start-x_offset)/10,-(start_y+30));
-        context.scale(1,-1);
+        context.fillText(this.locus_tag, (this.start-x_offset)/10,(start_y+30));
 
     }
 
@@ -299,7 +297,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         for (var i = 0; i<this.genomeList.length; i++){
             if(this.genomeList[i].id == id){
-                this.genomeList[i].geneList = [];
+                this.genomeList[i].genesForDisplay = [];
                 for (var j=0; j< genesForDisplay.length; j++) {
                     this.genomeList[i].addGene(genesForDisplay[j].id, genesForDisplay[j].locus_tag, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
             }
@@ -354,7 +352,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             for (var i = 0; i<theModel.genomeList.length; i++){
 
-                getGeneList(theModel.genomeList[i].id, theModel.genomeList[i].gene_of_interest_start_point + start_pos, theModel.genomeList[i].gene_of_interest_start_point + end_pos)
+                getGeneList(theModel.genomeList[i].id, theModel.genomeList[i].gene_of_interest_start_point + start_pos, theModel.genomeList[i].gene_of_interest_start_point + end_pos);
+
+                //alert("Genome " + i + " size: "+ theModel.genomeList[i].genesForDisplay.count());
+
             }
 
 
@@ -425,8 +426,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         return ctx.createPattern(c, 'repeat');
         })(500, 100);
 
-    ctx.scale(1, -1);
-    ctx.translate(0, -(can.height+100));
 
     can.onmousedown = function (e) {
         var evt = e || event;
@@ -453,28 +452,28 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         draw();
     }
 
-    can.addEventListener("mousewheel", mouseWheelHandler, false);
+    // can.addEventListener("mousewheel", mouseWheelHandler, false);
 
-    function mouseWheelHandler(e){
+    // function mouseWheelHandler(e){
 
-        var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+    //     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
-        draw(scale_factor);
-        if (delta < 0) { 
-            scale_factor =  0.8;        
-            draw(scale_factor);  
-            return false;
-        }
-        if (delta > 0) 
-        { 
-            scale_factor = 1.25;
-            draw(scale_factor);
-            return false;
-        }
+    //     draw(scale_factor);
+    //     if (delta < 0) { 
+    //         scale_factor =  0.8;        
+    //         draw(scale_factor);  
+    //         return false;
+    //     }
+    //     if (delta > 0) 
+    //     { 
+    //         scale_factor = 1.25;
+    //         draw(scale_factor);
+    //         return false;
+    //     }
 
-        return false;
+    //     return false;
 
-    }
+    // }
 
     draw();
 
@@ -493,8 +492,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         }
 
 
-      ctx.clearRect(-translated, 0, can.width, can.height+100);
-      ctx.rect(-translated, 0, can.width, can.height+100);
+      ctx.clearRect(-translated, 0, can.width, can.height);
+      ctx.rect(-translated, 0, can.width, can.height);
 
       ctx.fillStyle = grid; //grid should depend on scale - how much we've zoomed in/out
       ctx.fill();
@@ -512,9 +511,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       for (var i = st;i<=end_position+sc; i += sc)
       {
         ctx.font="15px Helvetica";
-        ctx.scale(1,-1);
-        ctx.fillText(((i-5000)/1000) + "kb", 5+(i/10),-(can.height+80));
-        ctx.scale(1,-1);
+        ctx.fillText(((i-5000)/1000) + "kb", 5+(i/10),15);
     }
 
 
@@ -526,7 +523,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         fillStyle = "rgb(" + redColour + ",0,0)";
 
-        y_coord = 40 + can.height - (i*100);
+        y_coord = (i*100) + 40;
 
         theModel.genomeList[i].draw(ctx,y_coord, fillStyle, can.width);
 
