@@ -258,11 +258,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.gene_of_interest_start_point = null;
     }
 
-    Genome.prototype.draw = function(context, start_y, fillStyle, canvasWidth){       
+    Genome.prototype.draw = function(context, start_y, fillStyle, scaling){       
 
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
-          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-(canvasWidth/2)*10, start_y, fillStyle); //-(canvasWidth/2)*10 to mark centre of canvas
+          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-(5000*scaling), start_y, fillStyle, scaling); 
         }
 
     }
@@ -283,12 +283,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.strand = strand;
     }
 
-    Gene.prototype.draw = function(context, x_offset, start_y, fillStyle){       
+    Gene.prototype.draw = function(context, x_offset, start_y, fillStyle, scaling){       
         context.fillStyle = fillStyle;
-        context.fillRect((this.start-x_offset)/10,start_y,this.length/10,20);
+        context.fillRect((this.start-x_offset)/(10*scaling),start_y,this.length/(10*scaling),20);
         context.fillStyle = "rgb(0,0,0)";
         context.font="10px Helvetica";
-        context.fillText(this.locus_tag, (this.start-x_offset)/10,(start_y+30));
+        context.fillText(this.locus_tag, (this.start-x_offset)/(10*scaling),(start_y+30));
 
     }
 
@@ -296,6 +296,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     Model.prototype.refreshGenome = function(id, genesForDisplay){
 
         for (var i = 0; i<this.genomeList.length; i++){
+
+            //N.B. issue with orthologues of same genome so ignoring these here
             if(this.genomeList[i].id == id){
                 this.genomeList[i].genesForDisplay = [];
                 for (var j=0; j< genesForDisplay.length; j++) {
@@ -314,7 +316,16 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         aGenome.gene_of_interest_start_point = gene_of_interest_start_point;
 
-        this.genomeList.push(aGenome);
+        var newGenome = true;
+        for (var i = 0; i<this.genomeList.length; i++){
+            if (this.genomeList[i].id ==id){
+                newGenome = false;
+            }
+        }
+
+        if (newGenome){
+            this.genomeList.push(aGenome);
+        }
 
     }
 
@@ -353,8 +364,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             for (var i = 0; i<theModel.genomeList.length; i++){
 
                 getGeneList(theModel.genomeList[i].id, theModel.genomeList[i].gene_of_interest_start_point + start_pos, theModel.genomeList[i].gene_of_interest_start_point + end_pos);
-
-                //alert("Genome " + i + " size: "+ theModel.genomeList[i].genesForDisplay.count());
 
             }
 
@@ -398,11 +407,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       dragging = false,
       lastX = 0,
       translated = 0,
-      scale_factor = 1.0,
-      scale = 1.0;
+      scale_index = 2;
 
-      can.height = 100+(numOrthologues*100);
+      can.height = theModel.genomeList.length*100;
       can.width = 1000;
+
+    var scales = [5.0,2.0,1.0,0.5,0.2,0.1];
 
 
      var grid = (function(dX, dY){
@@ -452,44 +462,45 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         draw();
     }
 
-    // can.addEventListener("mousewheel", mouseWheelHandler, false);
+    can.addEventListener("mousewheel", mouseWheelHandler, false);
 
-    // function mouseWheelHandler(e){
+    function mouseWheelHandler(e){
 
-    //     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+        var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
-    //     draw(scale_factor);
-    //     if (delta < 0) { 
-    //         scale_factor =  0.8;        
-    //         draw(scale_factor);  
-    //         return false;
-    //     }
-    //     if (delta > 0) 
-    //     { 
-    //         scale_factor = 1.25;
-    //         draw(scale_factor);
-    //         return false;
-    //     }
+        if (delta < 0) { 
 
-    //     return false;
+            if ((scale_index+1)<scales.length)
+            {
+                scale_index = scale_index+1;
+                start_position = start_position * scales[scale_index];
+                end_position = end_position * scales[scale_index];
+                refreshGeneLists(start_position, end_position);// is the the best place???
+                draw();
+            }
 
-    // }
+            return false;
+        }
+        if (delta > 0) 
+        { 
+            if ((scale_index-1)>-1)
+            {
+                scale_index = scale_index-1;
+                start_position = start_position * scales[scale_index];
+                end_position = end_position * scales[scale_index];
+                refreshGeneLists(start_position, end_position);// is the the best place???
+                draw();
+            }
+            return false;
+        }
+
+        return false;
+
+    }
 
     draw();
 
     function draw() {     
-        //fix scaling
-      if (scale_factor<1 && scale <=1 ) //can't zoom out anymore
-      {
-            scale_factor = 1.0;//don't zoom out 
-      } 
-
-      else
-      {
-          ctx.scale(scale_factor,scale_factor);
-          scale = scale*scale_factor;
-          scale_factor = 1.0;//reset scale_factor after scaling
-        }
 
 
       ctx.clearRect(-translated, 0, can.width, can.height);
@@ -499,9 +510,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       ctx.fill();
 
       //draw markers
-      //find scale once I have implemeneted zoom - switch statement maybe?... e.g. if scale is 2, markers every 10kb, scale is 1, markers every 5kb. if scale is 0.5, markers at 2.5kb, scale is 0.1, markers every 1 kb
-
-      var sc = 5000;
+ 
+      var sc = 5000 * scales [scale_index];
       var rem = start_position%sc;
 
       var st = start_position - rem;
@@ -511,7 +521,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       for (var i = st;i<=end_position+sc; i += sc)
       {
         ctx.font="15px Helvetica";
-        ctx.fillText(((i-5000)/1000) + "kb", 5+(i/10),15);
+        ctx.fillText(((i-(5000*scales[scale_index]))/1000) + "kb", 5+(i/(10*scales[scale_index])),20);//fix
     }
 
 
@@ -525,7 +535,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         y_coord = (i*100) + 40;
 
-        theModel.genomeList[i].draw(ctx,y_coord, fillStyle, can.width);
+        theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scales[scale_index]);//fix
 
 
       }
