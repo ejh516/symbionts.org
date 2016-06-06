@@ -258,11 +258,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.gene_of_interest_start_point = null;
     }
 
-    Genome.prototype.draw = function(context, start_y, fillStyle){       
+    Genome.prototype.draw = function(context, start_y, fillStyle, canvasWidth){       
 
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
-          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-5000, start_y, fillStyle); //fix this! 5000 shouldn't be there - start position
+          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-(canvasWidth/2)*10, start_y, fillStyle); //-(canvasWidth/2)*10 to mark centre of canvas
         }
 
     }
@@ -441,15 +441,16 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             translated += delta;
             ctx.translate(delta, 0);
             lastX = evt.offsetX;
-            // start_position = start_position + (delta*100);
-            // end_position = end_position + (delta*100);
-            // refreshGeneLists(start_position, end_position);
+            start_position = start_position - (delta*10);
+            end_position = end_position - (delta*10);
             draw();
             }
     }
 
     window.onmouseup = function () {
         dragging = false;
+        refreshGeneLists(start_position, end_position);// is the the best place???
+        draw();
     }
 
     can.addEventListener("mousewheel", mouseWheelHandler, false);
@@ -495,8 +496,28 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       ctx.clearRect(-translated, 0, can.width, can.height+100);
       ctx.rect(-translated, 0, can.width, can.height+100);
 
-      ctx.fillStyle = grid;
+      ctx.fillStyle = grid; //grid should depend on scale - how much we've zoomed in/out
       ctx.fill();
+
+      //draw markers
+      //find scale once I have implemeneted zoom - switch statement maybe?... e.g. if scale is 2, markers every 10kb, scale is 1, markers every 5kb. if scale is 0.5, markers at 2.5kb, scale is 0.1, markers every 1 kb
+
+      var sc = 5000;
+      var rem = start_position%sc;
+
+      var st = start_position - rem;
+
+      ctx.fillStyle = "rgb(112,128,144)";
+
+      for (var i = st;i<=end_position+sc; i += sc)
+      {
+        ctx.font="15px Helvetica";
+        ctx.scale(1,-1);
+        ctx.fillText(((i-5000)/1000) + "kb", 5+(i/10),-(can.height+80));
+        ctx.scale(1,-1);
+    }
+
+
 
 
       for (var i = 0; i < theModel.genomeList.length; i++) {
@@ -507,7 +528,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         y_coord = 40 + can.height - (i*100);
 
-        theModel.genomeList[i].draw(ctx,y_coord, fillStyle);
+        theModel.genomeList[i].draw(ctx,y_coord, fillStyle, can.width);
 
 
       }
