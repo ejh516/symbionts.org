@@ -258,11 +258,18 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.gene_of_interest_start_point = null;
     }
 
-    Genome.prototype.draw = function(context, start_y, fillStyle, scaling){       
+    Genome.prototype.draw = function(context, start_y, startStyle, scaling){ 
 
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
-          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-(5000*scaling), start_y, fillStyle, scaling); 
+            specialStyle = false;
+
+            if(this.genesForDisplay[j].start == this.gene_of_interest_start_point)
+            {
+                specialStyle = true;
+            }
+
+          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-(5000*scaling), start_y, startStyle, specialStyle, scaling); 
         }
 
     }
@@ -283,12 +290,84 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.strand = strand;
     }
 
-    Gene.prototype.draw = function(context, x_offset, start_y, fillStyle, scaling){       
-        context.fillStyle = fillStyle;
-        context.fillRect((this.start-x_offset)/(10*scaling),start_y,this.length/(10*scaling),20);
-        context.fillStyle = "rgb(0,0,0)";
-        context.font="10px Helvetica";
-        context.fillText(this.locus_tag, (this.start-x_offset)/(10*scaling),(start_y+30));
+    Gene.prototype.draw = function(context, x_offset, start_y, startStyle, specialStyle, scaling){  
+
+        var start_x = (this.start-x_offset)/(10*scaling);
+        var size =  this.length/(10*scaling); 
+        var height = 20; 
+
+
+        var middleStyle = "rgb(200,200,200)";
+        var endStyle = "rgba(200,200,200, 0.3)";
+        var fontStyle = "10px Helvetica";
+
+        var name = this.locus_tag;
+        var textStart_x = (this.start-x_offset)/(10*scaling);
+        var textStart_y = start_y+35;
+
+        
+
+        if (specialStyle){
+
+            middleStyle = startStyle;
+            endStyle = startStyle;
+            fontStyle = "bold 10px Helvetica";
+
+        }
+
+        context.font = fontStyle;
+        context.fillStyle = "black";
+        context.fillText(name, textStart_x,textStart_y);
+
+        if(this.strand == "-1"){
+            var grd=ctx.createLinearGradient(start_x,start_y,start_x + size,start_y + height);
+        }
+        else{
+            var grd=ctx.createLinearGradient(start_x + size,start_y + height, start_x,start_y);
+        }
+
+        grd.addColorStop(0,startStyle);
+        grd.addColorStop(0.75,middleStyle);
+        grd.addColorStop(1,endStyle);
+
+        context.fillStyle = grd;
+
+        if (specialStyle)
+        {
+            context.lineWidth = 3;
+            context.strokeStyle = "black";
+            context.strokeRect(start_x,start_y,size,height);
+            context.fillRect(start_x,start_y,size,height);
+
+        }
+        else{
+        context.fillRect(start_x,start_y,size,height);
+        }
+
+         context.beginPath();
+
+        if(this.strand == "-1"){
+
+                context.moveTo(start_x, start_y);
+                context.lineTo(start_x-10, start_y+10);
+                context.lineTo(start_x, start_y+20);
+            
+        }
+        else{
+                context.moveTo(start_x + size, start_y);
+                context.lineTo(start_x+size+10, start_y+10);
+                context.lineTo(start_x + size, start_y+20);
+        }
+            
+
+        context.closePath();
+
+        context.lineWidth = 5;
+        context.strokeStyle = startStyle;
+        context.stroke();
+         
+        context.fillStyle = startStyle;
+        context.fill();
 
     }
 
@@ -297,7 +376,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         for (var i = 0; i<this.genomeList.length; i++){
 
-            //N.B. issue with orthologues of same genome so ignoring these here
+            //N.B. issue with orthologues/paralogues? of same genome so ignoring these here
             if(this.genomeList[i].id == id){
                 this.genomeList[i].genesForDisplay = [];
                 for (var j=0; j< genesForDisplay.length; j++) {
@@ -382,7 +461,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    target_div.append("<h3>" + result.current_gene.locus_tag + "</h3>");
+    target_div.append("<h3>&nbsp<br>&nbsp</h3>");
 
 
     //first create the genomes
@@ -468,7 +547,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
-        if (delta < 0) { 
+        if (delta > 0) { 
 
             if ((scale_index+1)<scales.length)
             {
@@ -481,7 +560,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             return false;
         }
-        if (delta > 0) 
+        if (delta < 0) 
         { 
             if ((scale_index-1)>-1)
             {
@@ -500,13 +579,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     draw();
 
-    function draw() {     
+    function draw() {    
 
 
       ctx.clearRect(-translated, 0, can.width, can.height);
       ctx.rect(-translated, 0, can.width, can.height);
 
-      ctx.fillStyle = grid; //grid should depend on scale - how much we've zoomed in/out
+      ctx.fillStyle = grid; //grid should depend on scale?? - how much we've zoomed in/out
       ctx.fill();
 
       //draw markers
@@ -516,29 +595,36 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
       var st = start_position - rem;
 
-      ctx.fillStyle = "rgb(112,128,144)";
+      ctx.fillStyle = "rgb(100,100,100)";
 
       for (var i = st;i<=end_position+sc; i += sc)
       {
         ctx.font="15px Helvetica";
-        ctx.fillText(((i-(5000*scales[scale_index]))/1000) + "kb", 5+(i/(10*scales[scale_index])),20);//fix
+        ctx.fillText(((i-(5000*scales[scale_index]))/1000) + "kb", 5+(i/(10*scales[scale_index])),20);
     }
 
 
+        //draw main genome first
+
+        if(theModel.genomeList.length>0){
 
 
-      for (var i = 0; i < theModel.genomeList.length; i++) {
-
-         redColour = i*100;
-
-        fillStyle = "rgb(" + redColour + ",0,0)";
-
-        y_coord = (i*100) + 40;
-
-        theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scales[scale_index]);//fix
+            theModel.genomeList[0].draw(ctx, 40, "rgb(50,50,50)", scales[scale_index]);
 
 
-      }
+              for (var i = 1; i < theModel.genomeList.length; i++) {
+
+
+                 fillStyle = "rgb(100,100,200)";
+
+                y_coord = (i*100) + 40;
+
+                theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scales[scale_index]);
+
+
+              }
+
+    }
     
 
     setInterval(draw,100); 
@@ -547,29 +633,3 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
 }
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
