@@ -260,6 +260,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     Genome.prototype.draw = function(context, start_y, startStyle, scaling){ 
 
+        //first write genome name
+        context.fillStyle = "rgb(175,175,175)";
+        context.font = "12px Helvetica";
+        context.fillText(this.id, 500*scaling+2,start_y+50);
+
+
+
+        //then draw all the genes
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
             specialStyle = false;
@@ -305,46 +313,41 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var textStart_x = (this.start-x_offset)/(10*scaling);
         var textStart_y = start_y+35;
 
-        
-
-        if (specialStyle){
-
-            middleStyle = startStyle;
-            endStyle = startStyle;
-            fontStyle = "bold 10px Helvetica";
-
-        }
-
-        context.font = fontStyle;
-        context.fillStyle = "black";
-        context.fillText(name, textStart_x,textStart_y);
-
-        if(this.strand == "-1"){
-            var grd=ctx.createLinearGradient(start_x,start_y,start_x + size,start_y + height);
-        }
-        else{
-            var grd=ctx.createLinearGradient(start_x + size,start_y + height, start_x,start_y);
-        }
-
-        grd.addColorStop(0,startStyle);
-        grd.addColorStop(0.75,middleStyle);
-        grd.addColorStop(1,endStyle);
-
-        context.fillStyle = grd;
 
         if (specialStyle)
         {
             context.lineWidth = 3;
             context.strokeStyle = "black";
             context.strokeRect(start_x,start_y,size,height);
+            context.fillStyle = startStyle;
             context.fillRect(start_x,start_y,size,height);
+            fontStyle = "bold 10px Helvetica";
 
         }
         else{
-        context.fillRect(start_x,start_y,size,height);
+
+                if(this.strand == "-1"){
+                        var grd=ctx.createLinearGradient(start_x,start_y,start_x + size,start_y + height);
+                }
+                else{
+                        var grd=ctx.createLinearGradient(start_x + size,start_y + height, start_x,start_y);
+                }
+
+            grd.addColorStop(0,startStyle);
+            grd.addColorStop(0.75,middleStyle);
+            grd.addColorStop(1,endStyle);
+            context.fillStyle = grd;
+            context.fillRect(start_x,start_y,size,height);
         }
 
-         context.beginPath();
+
+        context.font = fontStyle;
+        context.fillStyle = "black";
+        context.fillText(name, textStart_x,textStart_y);
+
+        //draw triangles on end of gene
+
+        context.beginPath();
 
         if(this.strand == "-1"){
 
@@ -358,16 +361,22 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 context.lineTo(start_x+size+10, start_y+10);
                 context.lineTo(start_x + size, start_y+20);
         }
-            
+          
+  
+        context.strokeStyle = startStyle;
 
         context.closePath();
-
         context.lineWidth = 5;
-        context.strokeStyle = startStyle;
-        context.stroke();
+        context.stroke();      
+
          
         context.fillStyle = startStyle;
         context.fill();
+
+        //          if(specialStyle){ 
+        //     context.strokeStyle = "black";
+        // } 
+
 
     }
 
