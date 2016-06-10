@@ -256,9 +256,27 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.id = id;
         this.genesForDisplay = genesForDisplay;
         this.gene_of_interest_start_point = null;
+        this.gene_of_interest_end_point = null;
+        this.orientation = null;
     }
 
     Genome.prototype.draw = function(context, start_y, startStyle, scaling){ 
+
+        //if orientation is -1, flip genome
+
+        if(this.orientation == "-1")
+        {
+
+            //change start and end position and strand of every gene in genome, based on x-offset = gene of interest start point- 5000*scaling??
+
+            for (var j=0; j< this.genesForDisplay.length; j++) {
+
+                this.genesForDisplay[j].flip(this.gene_of_interest_start_point);
+            }
+
+            this.gene_of_interest_start_point = this.gene_of_interest_end_point;
+            //this.orientation = "1";
+        }
 
         //first write genome name
         context.fillStyle = "rgb(175,175,175)";
@@ -296,6 +314,32 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.end = end;
         this.length = end-start;
         this.strand = strand;
+        this.flipped = false;
+    }
+
+    Gene.prototype.flip = function (flipping_point){
+
+        if (this.flipped == false){
+
+            //alert("flipping");
+
+            if (this.strand == "1")
+            {
+                this.strand = "-1";
+            }
+            else{
+                this.strand = "1";
+            }
+
+            var temp1 = this.start + 2*(flipping_point - this.start);
+            var temp2 = this.end + 2*(flipping_point - this.end);
+
+            this.start = temp2;
+            this.end = temp1;
+
+            this.flipped = true;
+
+        }
     }
 
     Gene.prototype.draw = function(context, x_offset, start_y, startStyle, specialStyle, scaling){  
@@ -388,6 +432,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             //N.B. issue with orthologues/paralogues? of same genome so ignoring these here
             if(this.genomeList[i].id == id){
                 this.genomeList[i].genesForDisplay = [];
+                //this.orientation = 
                 for (var j=0; j< genesForDisplay.length; j++) {
                     this.genomeList[i].addGene(genesForDisplay[j].id, genesForDisplay[j].locus_tag, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
             }
@@ -396,13 +441,17 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     }
 
 
-    Model.prototype.createGenome = function (id, gene_of_interest_start_point){
+    Model.prototype.createGenome = function (id, gene_of_interest_start_point, gene_of_interest_end_point, orientation){
 
         geneList = [];
 
         aGenome = new Genome(id, geneList);
 
         aGenome.gene_of_interest_start_point = gene_of_interest_start_point;
+
+        aGenome.gene_of_interest_end_point = gene_of_interest_end_point;
+
+        aGenome.orientation = orientation;
 
         var newGenome = true;
         for (var i = 0; i<this.genomeList.length; i++){
@@ -446,12 +495,22 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     }
 
     
-    function refreshGeneLists(start_pos, end_pos){
+    function refreshGeneLists(start_p, end_p){
 
 
             for (var i = 0; i<theModel.genomeList.length; i++){
 
-                getGeneList(theModel.genomeList[i].id, theModel.genomeList[i].gene_of_interest_start_point + start_pos, theModel.genomeList[i].gene_of_interest_start_point + end_pos);
+                start_pos = theModel.genomeList[i].gene_of_interest_start_point + start_p;
+                end_pos = theModel.genomeList[i].gene_of_interest_start_point + end_p;
+
+                if (theModel.genomeList[i].orientation == "-1") // need to find genes on other side of genome and then flip them when drawing them
+                {
+                        temp1 = start_pos + 2*(theModel.genomeList[i].gene_of_interest_start_point - start_pos);
+                        start_pos = end_pos + 2*(theModel.genomeList[i].gene_of_interest_start_point - end_pos);
+                        end_pos = temp1;
+                }
+
+                getGeneList(theModel.genomeList[i].id, start_pos,end_pos );
 
             }
 
@@ -461,10 +520,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function createGenomes(numOrthologues){
 
-        theModel.createGenome(result.current_gene.genome, result.current_gene.start);
+        theModel.createGenome(result.current_gene.genome, result.current_gene.start, result.current_gene.end, result.current_gene.strand);
 
         for (var i=0; i<numOrthologues; i++){
-            theModel.createGenome(result.orthologues[i].genome, result.orthologues[i].start);
+            theModel.createGenome(result.orthologues[i].genome, result.orthologues[i].start, result.orthologues[i].end, result.orthologues[i].strand);
 
         }
 
@@ -538,8 +597,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             translated += delta;
             ctx.translate(delta, 0);
             lastX = evt.offsetX;
-            start_position = start_position - (delta*10);
-            end_position = end_position - (delta*10);
+            start_position = start_position - (delta*10)*scales[scale_index];
+            end_position = end_position - (delta*10)*scales[scale_index];
             draw();
             }
     }

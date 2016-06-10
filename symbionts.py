@@ -244,11 +244,8 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
     genome = db.genome
     features = db.genome.features
 
-    results = features.find({"genome": genome_id, "type": "CDS", "$or":[{"location.start":{"$lt":int(end_pos), "$gt":int(start_pos)}},{"location.end":{"$lt":int(end_pos), "$gt":int(start_pos)}}]})
-
-    # results = features.find({"genome": genome_id, "type": "gene", "$or":[{"location.start":{"$lt":int(end_pos), "$gt":int(start_pos)}},{"location.end":{"$lt":int(end_pos), "$gt":int(start_pos)}}]})
-
-    # results = features.find({"genome": genome_id, "$or":[{"location.start":{"$lt":int(end_pos), "$gt":int(start_pos)}},{"location.end":{"$lt":int(end_pos), "$gt":int(start_pos)}}]})
+    # find CDSs only for now
+    results = features.find({"genome": genome_id, "type": "CDS", "$or":[{"location.start":{"$lt":float(end_pos), "$gt":float(start_pos)}},{"location.end":{"$lt":float(end_pos), "$gt":float(start_pos)}}]}) 
 
     geneList = []
 
