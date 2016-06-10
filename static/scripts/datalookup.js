@@ -301,15 +301,15 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     }
 
 
-    Genome.prototype.addGene = function(id, locus_tag, start, end, strand)
+    Genome.prototype.addGene = function(id, displayName, start, end, strand)
     {
-        aGene = new Gene(id, locus_tag, start, end, strand);
+        aGene = new Gene(id, displayName, start, end, strand);
         this.genesForDisplay.push(aGene);
     }
 
-    function Gene(id, locus_tag, start, end, strand) {
+    function Gene(id, displayName, start, end, strand) {
         this.id = id;
-        this.locus_tag = locus_tag;  
+        this.displayName = displayName;  
         this.start = start;
         this.end = end;
         this.length = end-start;
@@ -353,7 +353,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var endStyle = "rgba(200,200,200, 0.3)";
         var fontStyle = "10px Helvetica";
 
-        var name = this.locus_tag;
+        var name = this.displayName;
         var textStart_x = (this.start-x_offset)/(10*scaling);
         var textStart_y = start_y+35;
 
@@ -417,10 +417,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         context.fillStyle = startStyle;
         context.fill();
 
-        //          if(specialStyle){ 
-        //     context.strokeStyle = "black";
-        // } 
-
 
     }
 
@@ -432,10 +428,16 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             //N.B. issue with orthologues/paralogues? of same genome so ignoring these here
             if(this.genomeList[i].id == id){
                 this.genomeList[i].genesForDisplay = [];
-                //this.orientation = 
                 for (var j=0; j< genesForDisplay.length; j++) {
-                    this.genomeList[i].addGene(genesForDisplay[j].id, genesForDisplay[j].locus_tag, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
-            }
+
+                    var displayName = genesForDisplay[j].locus_tag;
+
+                    if (genesForDisplay[j].name != "Undefined.") //if gene name exists, use this instead of locus_tag
+                    {
+                        displayName = genesForDisplay[j].name;
+                    }
+                    this.genomeList[i].addGene(genesForDisplay[j].id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
+                }
             }
         }
     }

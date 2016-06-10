@@ -251,11 +251,13 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
 
     for aGene in results:
 
-        aResult = {"_id": "Undefined.","locus_tag": "Undefined.", "type": "Undefined", "start": "-1", "end": "-1", "strand":"0"}
+        aResult = {"_id": "Undefined.","locus_tag": "Undefined.", "name": "Undefined.", "type": "Undefined.", "start": "-1", "end": "-1", "strand":"0"}
         if '_id' in aGene:
             aResult["_id"] = str(aGene['_id'])
         if 'locus_tag' in aGene:
             aResult["locus_tag"] = aGene['locus_tag']
+        if 'gene' in aGene:
+            aResult["name"] = aGene['gene']
         if 'type' in aGene:
             aResult["type"] = aGene['type']
         if 'location' in aGene:
