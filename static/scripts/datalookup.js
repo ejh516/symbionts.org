@@ -343,7 +343,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         }
     }
 
-    Gene.prototype.checkIfHoveredOver = function(context, x_coord, y_coord)
+    Gene.prototype.checkIfHoveredOver = function(x_coord, y_coord)
     {
         if ((x_coord>=this.canvasCovered[0]) && x_coord<=(this.canvasCovered[0]+this.canvasCovered[2]) && y_coord>=this.canvasCovered[1] && y_coord<=(this.canvasCovered[1]+this.canvasCovered[3]))
 
@@ -405,7 +405,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
 
         context.font = fontStyle;
+
+        if (this.hovered == true)
+        {
+           context.fillStyle = "blue";
+        }
+        else{
         context.fillStyle = "black";
+        }
         context.fillText(name, textStart_x,textStart_y);
 
         //draw triangles on end of gene
@@ -458,7 +465,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                     {
                         displayName = genesForDisplay[j].name;
                     }
-                    this.genomeList[i].addGene(genesForDisplay[j].id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
+                    this.genomeList[i].addGene(genesForDisplay[j]._id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
                 }
             }
         }
@@ -553,6 +560,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
+    function goToGeneDetailsPage(id){
+
+        //window.location.replace("/genedetails/" + id);
+        window.location.href = "/genedetails/" + id;
+       
+    }
+
     target_div.append("<h3>&nbsp<br>&nbsp</h3>");
 
 
@@ -638,7 +652,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 for (var j = 0; j<theModel.genomeList[i].genesForDisplay.length; j++)
                 {
 
-                    theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(ctx, x_coord, y_coord); 
+                    theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(x_coord, y_coord); 
                 }
             }
 
@@ -647,6 +661,25 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     window.onmouseup = function (e) {
         dragging = false;
+
+        //if mouseup on a gene that's hovered over go to that gene's page...
+
+        var rect = can.getBoundingClientRect();
+            var x_coord= start_position/(10*scales[scale_index]) + (e.clientX - rect.left) + 500;
+            var y_coord= (e.clientY - rect.top);
+
+            for (var i = 0; i<theModel.genomeList.length; i++)
+            {
+                for (var j = 0; j<theModel.genomeList[i].genesForDisplay.length; j++)
+                {
+                    if(theModel.genomeList[i].genesForDisplay[j].hovered){
+
+                        goToGeneDetailsPage(theModel.genomeList[i].genesForDisplay[j].id);
+                    } 
+                }
+            }
+
+        //
         refreshGeneLists(start_position, end_position);// is the the best place???
         draw();
 
