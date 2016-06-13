@@ -267,7 +267,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         if(this.orientation == "-1")
         {
 
-            //change start and end position and strand of every gene in genome, based on x-offset = gene of interest start point- 5000*scaling??
+            //change start and end position and strand of every gene in genome
 
             for (var j=0; j< this.genesForDisplay.length; j++) {
 
@@ -275,7 +275,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             }
 
             this.gene_of_interest_start_point = this.gene_of_interest_end_point;
-            //this.orientation = "1";
+
         }
 
         //first write genome name
@@ -304,6 +304,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     Genome.prototype.addGene = function(id, displayName, start, end, strand)
     {
         aGene = new Gene(id, displayName, start, end, strand);
+        aGene.canvasCovered = [0,0,0,0];
         this.genesForDisplay.push(aGene);
     }
 
@@ -315,13 +316,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.length = end-start;
         this.strand = strand;
         this.flipped = false;
+        this.hovered = false;
+        this.canvasCovered = [0,0,0,0]; //starting x coordinate, starting y coordinate, length and height
     }
 
     Gene.prototype.flip = function (flipping_point){
 
         if (this.flipped == false){
-
-            //alert("flipping");
 
             if (this.strand == "1")
             {
@@ -342,6 +343,19 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         }
     }
 
+    Gene.prototype.checkIfHoveredOver = function(context, x_coord, y_coord)
+    {
+        if ((x_coord>=this.canvasCovered[0]) && x_coord<=(this.canvasCovered[0]+this.canvasCovered[2]) && y_coord>=this.canvasCovered[1] && y_coord<=(this.canvasCovered[1]+this.canvasCovered[3]))
+
+        {
+            this.hovered = true;
+
+        }
+        else{
+            this.hovered = false;
+        }
+    }
+
     Gene.prototype.draw = function(context, x_offset, start_y, startStyle, specialStyle, scaling){  
 
         var start_x = (this.start-x_offset)/(10*scaling);
@@ -356,6 +370,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var name = this.displayName;
         var textStart_x = (this.start-x_offset)/(10*scaling);
         var textStart_y = start_y+35;
+
+        if (this.hovered == true)
+        {
+            startStyle = "rgb(0,0,200)";
+        }
 
 
         if (specialStyle)
@@ -416,6 +435,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
          
         context.fillStyle = startStyle;
         context.fill();
+
+        //set canvas covered
+        this.canvasCovered = [start_x, start_y, size, height];
 
 
     }
@@ -586,7 +608,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         })(500, 100);
 
 
+
     can.onmousedown = function (e) {
+
         var evt = e || event;
         dragging = true;
         lastX = evt.offsetX;
@@ -603,12 +627,29 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             end_position = end_position - (delta*10)*scales[scale_index];
             draw();
             }
+        else{
+
+            var rect = can.getBoundingClientRect();
+            var x_coord= start_position/(10*scales[scale_index]) + (e.clientX - rect.left) + 500;
+            var y_coord= (e.clientY - rect.top);
+
+            for (var i = 0; i<theModel.genomeList.length; i++)
+            {
+                for (var j = 0; j<theModel.genomeList[i].genesForDisplay.length; j++)
+                {
+
+                    theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(ctx, x_coord, y_coord); 
+                }
+            }
+
+        }
     }
 
-    window.onmouseup = function () {
+    window.onmouseup = function (e) {
         dragging = false;
         refreshGeneLists(start_position, end_position);// is the the best place???
         draw();
+
     }
 
     can.addEventListener("mousewheel", mouseWheelHandler, false);
@@ -655,7 +696,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       ctx.clearRect(-translated, 0, can.width, can.height);
       ctx.rect(-translated, 0, can.width, can.height);
 
-      ctx.fillStyle = grid; //grid should depend on scale?? - how much we've zoomed in/out
+      ctx.fillStyle = grid; 
       ctx.fill();
 
       //draw markers
