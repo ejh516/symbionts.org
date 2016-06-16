@@ -295,7 +295,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 specialStyle = true;
             }
 
-          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point-(5000*scaling), start_y, startStyle, specialStyle, scaling); 
+          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point, start_y, startStyle, specialStyle, scaling); 
         }
 
     }
@@ -358,7 +358,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     Gene.prototype.draw = function(context, x_offset, start_y, startStyle, specialStyle, scaling){  
 
-        var start_x = (this.start-x_offset)/(10*scaling);
+        var start_x = (this.start-(x_offset-5000*scaling))/(10*scaling);
         var size =  this.length/(10*scaling); 
         var height = 20; 
 
@@ -368,7 +368,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var fontStyle = "10px Helvetica";
 
         var name = this.displayName;
-        var textStart_x = (this.start-x_offset)/(10*scaling);
+        var textStart_x = (this.start-(x_offset-5000*scaling))/(10*scaling);
         var textStart_y = start_y+35;
 
         if (this.hovered == true)
@@ -413,7 +413,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         else{
         context.fillStyle = "black";
         }
-        context.fillText(name, textStart_x,textStart_y);
+        context.fillText(start_x, textStart_x,textStart_y);//change back to name
 
         //draw triangles on end of gene
 
@@ -562,12 +562,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function goToGeneDetailsPage(id){
 
-        //window.location.replace("/genedetails/" + id);
         window.location.href = "/genedetails/" + id;
        
     }
-
-    target_div.append("<h3>&nbsp<br>&nbsp</h3>");
 
 
     //first create the genomes
@@ -592,12 +589,18 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       dragging = false,
       lastX = 0,
       translated = 0,
+      shift = 0;
       scale_index = 2;
 
       can.height = theModel.genomeList.length*100;
       can.width = 1000;
 
-    var scales = [5.0,2.0,1.0,0.5,0.2,0.1];
+    var scales = [5.0,2.0,1.0,0.5,0.2, 0.1];
+
+        var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);
+
+        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+
 
 
      var grid = (function(dX, dY){
@@ -635,11 +638,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         if (dragging) {
             var delta = evt.offsetX - lastX;
             translated += delta;
-            ctx.translate(delta, 0);
+            ctx.translate (delta, 0);
             lastX = evt.offsetX;
-            start_position = start_position - (delta*10)*scales[scale_index];
-            end_position = end_position - (delta*10)*scales[scale_index];
+
+            start_position = start_position - (10*delta)*scales[scale_index];
+            end_position = end_position - (10*delta)*scales[scale_index];
             draw();
+
+         
             }
         else{
 
@@ -651,7 +657,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             {
                 for (var j = 0; j<theModel.genomeList[i].genesForDisplay.length; j++)
                 {
-
                     theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(x_coord, y_coord); 
                 }
             }
@@ -690,35 +695,99 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     function mouseWheelHandler(e){
 
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+        var prev_scale = scales[scale_index];
 
         if (delta > 0) { 
 
-            if ((scale_index+1)<scales.length)
-            {
-                scale_index = scale_index+1;
-                start_position = start_position * scales[scale_index];
-                end_position = end_position * scales[scale_index];
-                refreshGeneLists(start_position, end_position);// is the the best place???
-                draw();
-            }
+        zoomIn();
 
-            return false;
         }
         if (delta < 0) 
         { 
-            if ((scale_index-1)>-1)
-            {
-                scale_index = scale_index-1;
-                start_position = start_position * scales[scale_index];
-                end_position = end_position * scales[scale_index];
-                refreshGeneLists(start_position, end_position);// is the the best place???
-                draw();
-            }
-            return false;
+
+        zoomOut();
         }
+
 
         return false;
 
+    }
+
+    document.getElementById("zoom_in_button").addEventListener("click", zoomIn, false);
+    document.getElementById("zoom_out_button").addEventListener("click", zoomOut, false);
+
+    function zoomIn()
+    {
+        //alert("zooming in");
+
+        var prev_scale = scales[scale_index];
+        if ((scale_index+1)<scales.length)
+            {
+                scale_index = scale_index+1;
+                
+            }
+        var midpoint = start_position + (end_position - start_position)/2;
+
+        var new_length = (end_position - start_position) * (scales[scale_index]/prev_scale);
+
+        start_position = midpoint - new_length/2;
+        end_position = midpoint + new_length/2;
+
+        refreshGeneLists(start_position, end_position);// is the the best place???
+
+        shift = translated; //to improve
+
+        ctx.clearRect(-translated, 0, can.width, can.height);
+
+        ctx.translate(shift, 0);
+
+        ctx.clearRect(-translated-shift, 0, can.width, can.height);
+
+
+        draw();
+
+        var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);//to remove
+
+        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+
+        return false;
+    }
+
+    function zoomOut()
+    {
+        //alert("zooming out");
+
+        var prev_scale = scales[scale_index];
+                    if ((scale_index-1)>-1)
+            {
+                scale_index = scale_index-1;
+
+            }
+        var midpoint = start_position + (end_position - start_position)/2;
+
+        var new_length = (end_position - start_position) * (scales[scale_index]/prev_scale);
+
+        start_position = midpoint - new_length/2;
+        end_position = midpoint + new_length/2;
+
+        refreshGeneLists(start_position, end_position);// is the the best place???
+
+         shift = -translated * 0.5; // to improve
+
+         ctx.clearRect(-translated, 0, can.width, can.height);
+
+        ctx.translate(shift, 0);
+
+        ctx.clearRect(-translated-shift, 0, can.width, can.height);
+
+
+        draw();
+
+        var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);//to remove
+
+        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+
+        return false;
     }
 
     draw();
@@ -726,8 +795,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     function draw() {    
 
 
-      ctx.clearRect(-translated, 0, can.width, can.height);
-      ctx.rect(-translated, 0, can.width, can.height);
+      ctx.clearRect(-translated-shift, 0, can.width, can.height);
+      ctx.rect(-translated-shift, 0, can.width, can.height);
 
       ctx.fillStyle = grid; 
       ctx.fill();
@@ -769,8 +838,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
               }
 
     }
-    
 
+    //var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);//to remove
+
+    //document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------| Start: " + start_position + " End: " + end_position + " -Translated: " + (-translated) + "to " + (-translated + can.width)+ " Shift: " + shift//to remove
+
+    
+  
     setInterval(draw,100); 
 
     }

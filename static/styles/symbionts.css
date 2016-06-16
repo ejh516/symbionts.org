@@ -39,6 +39,12 @@ h3 {
     font-size: 16pt;
 }
 
+h4 {
+    font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-weight: 100;
+    font-size: 12pt;
+}
+
 a {
     color: #888888;
     text-decoration: none;
@@ -108,5 +114,11 @@ canvas {
   display:block;
   border:solid 1px #000;
   float: right;
+}
+
+button {
+
+  float: right;
+
 }
 
