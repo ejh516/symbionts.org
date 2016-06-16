@@ -413,7 +413,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         else{
         context.fillStyle = "black";
         }
-        context.fillText(start_x, textStart_x,textStart_y);//change back to name
+        context.fillText(name, textStart_x,textStart_y);//change back to name
 
         //draw triangles on end of gene
 
@@ -590,14 +590,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       lastX = 0,
       translated = 0,
       shift = 0;
-      scale_index = 2;
+      scale = 1.0;
 
       can.height = theModel.genomeList.length*100;
-      can.width = 1000;
+      can.width = 950;
 
-    var scales = [5.0,2.0,1.0,0.5,0.2, 0.1];
-
-        var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);
+        var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);
 
         document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
 
@@ -641,8 +639,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             ctx.translate (delta, 0);
             lastX = evt.offsetX;
 
-            start_position = start_position - (10*delta)*scales[scale_index];
-            end_position = end_position - (10*delta)*scales[scale_index];
+            start_position = start_position - (10*delta)*scale;
+            end_position = end_position - (10*delta)*scale;
             draw();
 
          
@@ -650,7 +648,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         else{
 
             var rect = can.getBoundingClientRect();
-            var x_coord= start_position/(10*scales[scale_index]) + (e.clientX - rect.left) + 500;
+            var x_coord= start_position/(10*scale) + (e.clientX - rect.left) + 500;
             var y_coord= (e.clientY - rect.top);
 
             for (var i = 0; i<theModel.genomeList.length; i++)
@@ -670,7 +668,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         //if mouseup on a gene that's hovered over go to that gene's page...
 
         var rect = can.getBoundingClientRect();
-            var x_coord= start_position/(10*scales[scale_index]) + (e.clientX - rect.left) + 500;
+            var x_coord= start_position/(10*scale) + (e.clientX - rect.left) + 500;
             var y_coord= (e.clientY - rect.top);
 
             for (var i = 0; i<theModel.genomeList.length; i++)
@@ -695,7 +693,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     function mouseWheelHandler(e){
 
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-        var prev_scale = scales[scale_index];
+        var prev_scale = scale;
 
         if (delta > 0) { 
 
@@ -720,35 +718,44 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     {
         //alert("zooming in");
 
-        var prev_scale = scales[scale_index];
-        if ((scale_index+1)<scales.length)
+        var prev_scale = scale;
+        if (scale>=0.5)
             {
-                scale_index = scale_index+1;
+                scale = scale/2;
+
+                var midpoint = start_position + (end_position - start_position)/2;
+
+                var new_length = (end_position - start_position) * (scale/prev_scale);
+
+                start_position = midpoint - new_length/2;
+                end_position = midpoint + new_length/2;
+
+                refreshGeneLists(start_position, end_position);// is the the best place???
+
+                
+
+                ctx.clearRect(-translated, 0, can.width, can.height);
+
+                ctx.translate(translated, 0);
+
+                translated = 2*translated
+
+                ctx.clearRect(-translated, 0, can.width, can.height);
+
+
+                draw();
+
+                var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);//to remove
+
+                document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
                 
             }
-        var midpoint = start_position + (end_position - start_position)/2;
 
-        var new_length = (end_position - start_position) * (scales[scale_index]/prev_scale);
+        else{
 
-        start_position = midpoint - new_length/2;
-        end_position = midpoint + new_length/2;
-
-        refreshGeneLists(start_position, end_position);// is the the best place???
-
-        shift = translated; //to improve
-
-        ctx.clearRect(-translated, 0, can.width, can.height);
-
-        ctx.translate(shift, 0);
-
-        ctx.clearRect(-translated-shift, 0, can.width, can.height);
-
-
-        draw();
-
-        var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);//to remove
-
-        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+            alert ("Cannot zoom in further.");
+        }
+        
 
         return false;
     }
@@ -757,35 +764,44 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     {
         //alert("zooming out");
 
-        var prev_scale = scales[scale_index];
-                    if ((scale_index-1)>-1)
+        var prev_scale = scale;
+        if (scale<=2.0)
             {
-                scale_index = scale_index-1;
+                scale = scale*2;
+
+                var midpoint = start_position + (end_position - start_position)/2;
+
+                var new_length = (end_position - start_position) * (scale/prev_scale);
+
+                start_position = midpoint - new_length/2;
+                end_position = midpoint + new_length/2;
+
+                refreshGeneLists(start_position, end_position);// is the the best place???
+
+
+
+                ctx.clearRect(-translated, 0, can.width, can.height);
+
+                translated = 0.5*translated;
+
+                ctx.translate(-translated, 0);
+
+                ctx.clearRect(-translated, 0, can.width, can.height);
+
+
+
+                draw();
+
+                var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);//to remove
+
+                document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
 
             }
-        var midpoint = start_position + (end_position - start_position)/2;
+        else {
 
-        var new_length = (end_position - start_position) * (scales[scale_index]/prev_scale);
-
-        start_position = midpoint - new_length/2;
-        end_position = midpoint + new_length/2;
-
-        refreshGeneLists(start_position, end_position);// is the the best place???
-
-         shift = -translated * 0.5; // to improve
-
-         ctx.clearRect(-translated, 0, can.width, can.height);
-
-        ctx.translate(shift, 0);
-
-        ctx.clearRect(-translated-shift, 0, can.width, can.height);
-
-
-        draw();
-
-        var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);//to remove
-
-        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+            alert ("Cannot zoom out further.");
+        }
+        
 
         return false;
     }
@@ -795,15 +811,15 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     function draw() {    
 
 
-      ctx.clearRect(-translated-shift, 0, can.width, can.height);
-      ctx.rect(-translated-shift, 0, can.width, can.height);
+      ctx.clearRect(-translated, 0, can.width, can.height);
+      ctx.rect(-translated, 0, can.width, can.height);
 
       ctx.fillStyle = grid; 
       ctx.fill();
 
       //draw markers
  
-      var sc = 5000 * scales [scale_index];
+      var sc = 5000 * scale;
       var rem = start_position%sc;
 
       var st = start_position - rem;
@@ -813,7 +829,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       for (var i = st;i<=end_position+sc; i += sc)
       {
         ctx.font="15px Helvetica";
-        ctx.fillText(((i-(5000*scales[scale_index]))/1000) + "kb", 5+(i/(10*scales[scale_index])),20);
+        ctx.fillText(((i-(5000*scale))/1000) + "kb", 5+(i/(10*scale)),20);
     }
 
 
@@ -822,7 +838,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         if(theModel.genomeList.length>0){
 
 
-            theModel.genomeList[0].draw(ctx, 40, "rgb(50,50,50)", scales[scale_index]);
+            theModel.genomeList[0].draw(ctx, 40, "rgb(50,50,50)", scale);
 
 
               for (var i = 1; i < theModel.genomeList.length; i++) {
@@ -832,17 +848,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                 y_coord = (i*100) + 40;
 
-                theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scales[scale_index]);
+                theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scale);
 
 
               }
 
     }
-
-    //var s = String("--------- " + (scales[scale_index]*10/4).toFixed(2)).slice(-5);//to remove
-
-    //document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------| Start: " + start_position + " End: " + end_position + " -Translated: " + (-translated) + "to " + (-translated + can.width)+ " Shift: " + shift//to remove
-
     
   
     setInterval(draw,100); 
