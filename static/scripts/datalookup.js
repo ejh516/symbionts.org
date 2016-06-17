@@ -260,6 +260,65 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.orientation = null;
     }
 
+    function Gene(id, displayName, start, end, strand) {
+        this.id = id;
+        this.displayName = displayName;  
+        this.start = start;
+        this.end = end;
+        this.length = end-start;
+        this.strand = strand;
+        this.flipped = false;
+        this.hovered = false;
+        this.canvasCovered = [0,0,0,0]; //starting x coordinate, starting y coordinate, length and height
+    }
+
+    Model.prototype.refreshGenome = function(id, genesForDisplay){
+
+        for (var i = 0; i<this.genomeList.length; i++){
+
+            //N.B. issue with orthologues/paralogues? of same genome so ignoring these here
+            if(this.genomeList[i].id == id){
+                this.genomeList[i].genesForDisplay = [];
+                for (var j=0; j< genesForDisplay.length; j++) {
+
+                    var displayName = genesForDisplay[j].locus_tag;
+
+                    if (genesForDisplay[j].name != "Undefined.") //if gene name exists, use this instead of locus_tag
+                    {
+                        displayName = genesForDisplay[j].name;
+                    }
+                    this.genomeList[i].addGene(genesForDisplay[j]._id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
+                }
+            }
+        }
+    }
+
+
+    Model.prototype.createGenome = function (id, gene_of_interest_start_point, gene_of_interest_end_point, orientation){
+
+        geneList = [];
+
+        aGenome = new Genome(id, geneList);
+
+        aGenome.gene_of_interest_start_point = gene_of_interest_start_point;
+
+        aGenome.gene_of_interest_end_point = gene_of_interest_end_point;
+
+        aGenome.orientation = orientation;
+
+        var newGenome = true;
+        for (var i = 0; i<this.genomeList.length; i++){
+            if (this.genomeList[i].id ==id){
+                newGenome = false;
+            }
+        }
+
+        if (newGenome){
+            this.genomeList.push(aGenome);
+        }
+
+    }
+
     Genome.prototype.draw = function(context, start_y, startStyle, scaling){ 
 
         //if orientation is -1, flip genome
@@ -308,17 +367,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.genesForDisplay.push(aGene);
     }
 
-    function Gene(id, displayName, start, end, strand) {
-        this.id = id;
-        this.displayName = displayName;  
-        this.start = start;
-        this.end = end;
-        this.length = end-start;
-        this.strand = strand;
-        this.flipped = false;
-        this.hovered = false;
-        this.canvasCovered = [0,0,0,0]; //starting x coordinate, starting y coordinate, length and height
-    }
 
     Gene.prototype.flip = function (flipping_point){
 
@@ -450,61 +498,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     }
 
 
-    Model.prototype.refreshGenome = function(id, genesForDisplay){
-
-        for (var i = 0; i<this.genomeList.length; i++){
-
-            //N.B. issue with orthologues/paralogues? of same genome so ignoring these here
-            if(this.genomeList[i].id == id){
-                this.genomeList[i].genesForDisplay = [];
-                for (var j=0; j< genesForDisplay.length; j++) {
-
-                    var displayName = genesForDisplay[j].locus_tag;
-
-                    if (genesForDisplay[j].name != "Undefined.") //if gene name exists, use this instead of locus_tag
-                    {
-                        displayName = genesForDisplay[j].name;
-                    }
-                    this.genomeList[i].addGene(genesForDisplay[j]._id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
-                }
-            }
-        }
-    }
-
-
-    Model.prototype.createGenome = function (id, gene_of_interest_start_point, gene_of_interest_end_point, orientation){
-
-        geneList = [];
-
-        aGenome = new Genome(id, geneList);
-
-        aGenome.gene_of_interest_start_point = gene_of_interest_start_point;
-
-        aGenome.gene_of_interest_end_point = gene_of_interest_end_point;
-
-        aGenome.orientation = orientation;
-
-        var newGenome = true;
-        for (var i = 0; i<this.genomeList.length; i++){
-            if (this.genomeList[i].id ==id){
-                newGenome = false;
-            }
-        }
-
-        if (newGenome){
-            this.genomeList.push(aGenome);
-        }
-
-    }
-
-
-
     //CONTROLLER SECTION...
 
-    //make a model
-    var genomeList = [];
-
-    theModel = new Model(genomeList);
 
     function getGeneList(genome_ID, start_pos, end_pos){
 
@@ -566,6 +561,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
        
     }
 
+    //make a model
+    var genomeList = [];
+
+    theModel = new Model(genomeList);
+
 
     //first create the genomes
 
@@ -589,15 +589,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
       dragging = false,
       lastX = 0,
       translated = 0,
-      shift = 0;
       scale = 1.0;
 
       can.height = theModel.genomeList.length*100;
       can.width = 950;
-
-        var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);
-
-        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
 
 
 
@@ -688,8 +683,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    can.addEventListener("mousewheel", mouseWheelHandler, false);
-
     function mouseWheelHandler(e){
 
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
@@ -711,8 +704,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    document.getElementById("zoom_in_button").addEventListener("click", zoomIn, false);
-    document.getElementById("zoom_out_button").addEventListener("click", zoomOut, false);
 
     function zoomIn()
     {
@@ -730,9 +721,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 start_position = midpoint - new_length/2;
                 end_position = midpoint + new_length/2;
 
-                refreshGeneLists(start_position, end_position);// is the the best place???
-
-                
+                refreshGeneLists(start_position, end_position);            
 
                 ctx.clearRect(-translated, 0, can.width, can.height);
 
@@ -745,9 +734,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                 draw();
 
-                var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);//to remove
-
-                document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+                showScale();
                 
             }
 
@@ -776,8 +763,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 start_position = midpoint - new_length/2;
                 end_position = midpoint + new_length/2;
 
-                refreshGeneLists(start_position, end_position);// is the the best place???
-
+                refreshGeneLists(start_position, end_position);
 
 
                 ctx.clearRect(-translated, 0, can.width, can.height);
@@ -788,13 +774,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                 ctx.clearRect(-translated, 0, can.width, can.height);
 
-
-
                 draw();
 
-                var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);//to remove
-
-                document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+                showScale();
 
             }
         else {
@@ -806,59 +788,66 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         return false;
     }
 
-    draw();
+    function showScale(){
+
+        var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);
+        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+
+    }
 
     function draw() {    
 
+        ctx.clearRect(-translated, 0, can.width, can.height);
+        ctx.rect(-translated, 0, can.width, can.height);
 
-      ctx.clearRect(-translated, 0, can.width, can.height);
-      ctx.rect(-translated, 0, can.width, can.height);
+        ctx.fillStyle = grid; 
+        ctx.fill();
 
-      ctx.fillStyle = grid; 
-      ctx.fill();
+        //draw markers
+        var sc = 5000 * scale;
+        var rem = start_position%sc;
 
-      //draw markers
- 
-      var sc = 5000 * scale;
-      var rem = start_position%sc;
+        var st = start_position - rem;
 
-      var st = start_position - rem;
+        ctx.fillStyle = "rgb(100,100,100)";
 
-      ctx.fillStyle = "rgb(100,100,100)";
-
-      for (var i = st;i<=end_position+sc; i += sc)
-      {
+        for (var i = st;i<=end_position+sc; i += sc)
+        {
         ctx.font="15px Helvetica";
         ctx.fillText(((i-(5000*scale))/1000) + "kb", 5+(i/(10*scale)),20);
-    }
-
+        }
 
         //draw main genome first
 
         if(theModel.genomeList.length>0){
 
-
             theModel.genomeList[0].draw(ctx, 40, "rgb(50,50,50)", scale);
 
+            for (var i = 1; i < theModel.genomeList.length; i++) {
 
-              for (var i = 1; i < theModel.genomeList.length; i++) {
-
-
-                 fillStyle = "rgb(100,100,200)";
+                fillStyle = "rgb(100,100,200)";
 
                 y_coord = (i*100) + 40;
 
                 theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scale);
 
-
               }
 
-    }
-    
+        }
   
-    setInterval(draw,100); 
+        setInterval(draw,100); 
 
     }
+
+
+    can.addEventListener("mousewheel", mouseWheelHandler, false);
+    document.getElementById("zoom_in_button").addEventListener("click", zoomIn, false);
+    document.getElementById("zoom_out_button").addEventListener("click", zoomOut, false);
+
+    draw();
+
+    showScale();
+
 
 }
     
