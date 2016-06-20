@@ -193,11 +193,18 @@ function format_basic_gene_data(result, text_status, jqXHR, target_div) {
     table.append("<tr><td> EC Number </td><td>" + result.EC_number + "</td></tr>");
     table.append("<tr><td> Protein ID </td><td><a href=http://www.ncbi.nlm.nih.gov/protein/" + result.protein_id + ">" + result.protein_id+ "</a></td></tr>"); 
     
-    var db_xref = result.db_xref[0];
 
+    var parsed = result.db_xref[0].split(":");
+    if(parsed.length>1){
+    db_xref = parsed[0] + ": " + parsed[1];
+    }
+    else{
+        db_xref = "None."
+    }
     for (var j=1; j< result.db_xref.length; j++) {
 
-         db_xref = db_xref + "</br>" + result.db_xref[j];
+        parsed = result.db_xref[j].split(":");
+        db_xref = db_xref + "</br>" + parsed[0] + ": " + parsed[1] ;
     }
     table.append("<tr><td> Other database references </td><td>" + db_xref + "</td></tr>");
     
@@ -235,7 +242,7 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
          }
     }
     else{
-        target_div.append("<a>No orthologues found.</a>")
+        target_div.append("<p>No orthologues found.</p>")
     }
 
 
@@ -557,7 +564,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function goToGeneDetailsPage(id){
 
-        window.location.href = "/genedetails/" + id;
+        window.location.href = "/genedetails/" + id; //slow
        
     }
 
@@ -626,7 +633,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         lastX = evt.offsetX;
     }
 
-    window.onmousemove = function (e) {
+    can.onmousemove = function (e) {
         var evt = e || event;
         if (dragging) {
             var delta = evt.offsetX - lastX;
@@ -657,7 +664,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         }
     }
 
-    window.onmouseup = function (e) {
+    can.onmouseup = function (e) {
+
         dragging = false;
 
         //if mouseup on a gene that's hovered over go to that gene's page...
@@ -673,12 +681,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                     if(theModel.genomeList[i].genesForDisplay[j].hovered){
 
                         goToGeneDetailsPage(theModel.genomeList[i].genesForDisplay[j].id);
+                        return false;
                     } 
                 }
             }
 
-        //
-        refreshGeneLists(start_position, end_position);// is the the best place???
+        //refresh gene lists after dragging
+        refreshGeneLists(start_position, end_position);
         draw();
 
     }
@@ -817,12 +826,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         ctx.fillText(((i-(5000*scale))/1000) + "kb", 5+(i/(10*scale)),20);
         }
 
-        //draw main genome first
 
         if(theModel.genomeList.length>0){
 
+            //draw main genome first
             theModel.genomeList[0].draw(ctx, 40, "rgb(50,50,50)", scale);
 
+            //then draw orthologue genomes
             for (var i = 1; i < theModel.genomeList.length; i++) {
 
                 fillStyle = "rgb(100,100,200)";
