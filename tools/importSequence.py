@@ -73,13 +73,15 @@ for seq in SeqIO.parse(args.filename[0], args.format):
     if 'references' in seq.annotations:
         genome['references'] = []
         for reference in seq.annotations['references']:
+
             new_reference = {'title': reference.title,
                              'authors': reference.authors,
-                             'journal': reference.journal,
-                             'location': {'start': reference.location[0].start.position,
+                             'journal': reference.journal
+                            }
+            if len(reference.location) > 0:
+                new_reference['location'] =  {'start': reference.location[0].start.position,
                                           'end': reference.location[0].end.position,
                                           'strand': reference.location[0].strand}
-                            }
             if reference.pubmed_id != "":
                 new_reference['pubmed_id'] = reference.pubmed_id
             if reference.medline_id != "":
@@ -163,4 +165,4 @@ feature_indices = features.index_information().keys()
 if 'species' not in genome_indices:
     genomes.create_index([("organism",1)], name='species')
 if 'full_text' not in feature_indices:
-    features.create_index([("$**": 'text')], name='full_text')
+    features.create_index([("$**", 'text')], name='full_text')

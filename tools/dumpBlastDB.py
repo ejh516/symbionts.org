@@ -7,7 +7,7 @@ import os, tempfile
 import subprocess
 import argparse
 
-parser = argparse.ArgumentParser(description="Go through the CDS features for all genomes and save the protein sequnces in FASTA format.")
+parser = argparse.ArgumentParser(description="Go through the CDS features for all genomes and save the protein sequences in FASTA format.")
 
 parser.add_argument("filename", 
                     nargs=1, 
@@ -48,7 +48,7 @@ if not args.split:
     tmpfile = open(filename, "w")
 for i, genome in enumerate(genomes.find()):
     if args.split:
-        tmpfile = open("Genome" + str(i) + filename, "w")
+        tmpfile = open(filename + "_genome_"+ genome["_id"], "w")
     for feature in features.find({"genome": genome["_id"]}):
         if feature['type'] == 'CDS':
             if 'translation' not in feature:
