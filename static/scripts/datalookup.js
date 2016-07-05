@@ -405,10 +405,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             context.font = "12px Helvetica";
             context.fillStyle = "black";
-            context.fillText("Gene: " + name, box_x + 10,start_y - 20);
-            context.fillText("Position: " + start+ " to " +end, box_x + 10,start_y);
-            context.fillText("Genome: " + genome, box_x + 10,start_y+20);           
-            context.fillText("Organism: " + "anOrganism", box_x + 10,start_y+40);
+            context.fillText("Gene: " + name, box_x + 10,start_y - 17);
+            context.fillText("Position: " + start+ " to " +end, box_x + 10,start_y+3);
+            context.fillText("Genome: " + genome, box_x + 10,start_y+23);           
+            context.fillText("Organism: " + "anOrganism", box_x + 10,start_y+43);
 
         }
     }
@@ -890,7 +890,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             //then draw orthologue genomes
             for (var i = 1; i < theModel.genomeList.length; i++) {
 
-                fillStyle = "rgb(100,100,200)";
+                fillStyle = "rgb(80,140,150)";
 
                 y_coord = (i*100) + 40;
 
