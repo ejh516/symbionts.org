@@ -352,6 +352,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
 
         //then draw all the genes
+
+        var drawBox = false;
+        var box_x = 0;
+        var name = "Unknown.";
+        var genome = "Unknown.";
+        var start = "0";
+        var end = "0";
+
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
             specialStyle = false;
@@ -362,8 +370,47 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             }
 
           this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point, start_y, startStyle, specialStyle, scaling); 
+
+  
+
+          if (this.genesForDisplay[j].hovered)
+          { 
+
+            drawBox = true; 
+            var x = (this.genesForDisplay[j].start-(this.gene_of_interest_start_point-5000*scaling))/(10*scaling);
+            box_x = x + this.genesForDisplay[j].length/(2*10*scaling) - 100;
+
+            name = this.genesForDisplay[j].displayName;
+            genome = this.id;
+            start = this.genesForDisplay[j].start;
+            end = this.genesForDisplay[j].end;
+
+          }
         }
 
+        //draw pop-up box if a gene is hovered over
+
+        if (drawBox == true) {
+
+            context.beginPath();//not quite sure why I have to do this to prevent initial triangle being drawn
+            context.closePath();
+
+
+            context.fillStyle = "white";
+            context.rect(box_x, start_y-40, 200, 100)
+            context.strokeStyle = "black";
+            context.lineWidth = 1;
+            context.fill();
+            context.stroke();
+
+            context.font = "12px Helvetica";
+            context.fillStyle = "black";
+            context.fillText("Gene: " + name, box_x + 10,start_y - 20);
+            context.fillText("Position: " + start+ " to " +end, box_x + 10,start_y);
+            context.fillText("Genome: " + genome, box_x + 10,start_y+20);           
+            context.fillText("Organism: " + "anOrganism", box_x + 10,start_y+40);
+
+        }
     }
 
 
@@ -429,6 +476,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         if (this.hovered == true)
         {
             startStyle = "rgb(0,0,200)";
+
         }
 
 
@@ -463,16 +511,19 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         if (this.hovered == true)
         {
+
            context.fillStyle = "blue";
         }
         else{
         context.fillStyle = "black";
         }
-        context.fillText(name, textStart_x,textStart_y);//change back to name
+        context.fillText(name, textStart_x,textStart_y);
 
         //draw triangles on end of gene
 
+
         context.beginPath();
+
 
         if(this.strand == "-1"){
 
@@ -482,16 +533,21 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             
         }
         else{
+
                 context.moveTo(start_x + size, start_y);
                 context.lineTo(start_x+size+10, start_y+10);
                 context.lineTo(start_x + size, start_y+20);
+
         }
           
   
         context.strokeStyle = startStyle;
+        context.lineWidth = 3;
 
         context.closePath();
-        context.lineWidth = 5;
+
+        //context.strokeStyle = "red";
+
         context.stroke();      
 
          
@@ -716,7 +772,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function zoomIn()
     {
-        //alert("zooming in");
 
         var prev_scale = scale;
         if (scale>=0.5)
