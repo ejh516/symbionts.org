@@ -530,7 +530,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         else{
         context.fillStyle = "black";
         }
-        context.fillText(name, textStart_x,textStart_y);
+
+        n = name.toString();
+        maxLength = Math.min(n.length, size/5);
+        context.fillText(n.substring(0,maxLength), textStart_x,textStart_y);
 
         //draw triangles on end of gene
 
