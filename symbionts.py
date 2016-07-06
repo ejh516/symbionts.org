@@ -191,7 +191,14 @@ def get_orthologues_by_ID(gene_id):
         if 'end' in current_gene['location']:
             current_gene_results["end"] = current_gene["location"]["end"]
         if 'strand' in current_gene['location']:
-            current_gene_results["strand"] = current_gene["location"]["strand"]      
+            current_gene_results["strand"] = current_gene["location"]["strand"]  
+
+    replicon_result =  genome.find_one({"_id":current_gene_results["genome"]})
+
+    if 'organism' in replicon_result:
+            current_gene_results["organism"] = replicon_result["organism"]
+    if 'replicon_type' in replicon_result:
+            current_gene_results["replicon_type"] = replicon_result["replicon_type"]    
 
     results["current_gene"] = current_gene_results
 
@@ -271,7 +278,7 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
         geneList.append(aResult)
 
 
-    aResult = {"_id":genome_id, "organism": "anOrganism", "geneList":geneList}
+    aResult = {"_id":genome_id, "organism": "an_Organism", "geneList":geneList}
 
     return jsonify(aResult)
 

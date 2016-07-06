@@ -259,8 +259,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    function Genome(id, genesForDisplay) {
+    function Genome(id, organism, genesForDisplay) {
         this.id = id;
+        this.organism = organism;
         this.genesForDisplay = genesForDisplay;
         this.gene_of_interest_start_point = null;
         this.gene_of_interest_end_point = null;
@@ -301,11 +302,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     }
 
 
-    Model.prototype.createGenome = function (id, gene_of_interest_start_point, gene_of_interest_end_point, orientation){
+    Model.prototype.createGenome = function (id, organism, gene_of_interest_start_point, gene_of_interest_end_point, orientation){
 
         geneList = [];
 
-        aGenome = new Genome(id, geneList);
+        aGenome = new Genome(id, organism, geneList);
 
         aGenome.gene_of_interest_start_point = gene_of_interest_start_point;
 
@@ -359,6 +360,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var genome = "Unknown.";
         var start = "0";
         var end = "0";
+        var organism = "???";
 
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
@@ -378,12 +380,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             drawBox = true; 
             var x = (this.genesForDisplay[j].start-(this.gene_of_interest_start_point-5000*scaling))/(10*scaling);
-            box_x = x + this.genesForDisplay[j].length/(2*10*scaling) - 100;
+            box_x = x + this.genesForDisplay[j].length/(2*10*scaling);
 
             name = this.genesForDisplay[j].displayName;
             genome = this.id;
             start = this.genesForDisplay[j].start;
             end = this.genesForDisplay[j].end;
+            organism = this.organism; //set maximum size here
 
           }
         }
@@ -395,20 +398,30 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             context.beginPath();//not quite sure why I have to do this to prevent initial triangle being drawn
             context.closePath();
 
+            geneText = "Gene: " + name;
+            posText = "Position: " + start+ " to " +end;
+            genomeText = "Genome: " + genome;
+            organismText = "Organism: " + organism;
+
+            boxLength = (Math.max(geneText.length, posText.length, genomeText.length, organismText.length)*5) + 10;
+
+            box_x = box_x - boxLength/2; //reposition start of box according to length of box
+
 
             context.fillStyle = "white";
-            context.rect(box_x, start_y-40, 200, 100)
+            context.rect(box_x, start_y-40, boxLength, 100)
             context.strokeStyle = "black";
             context.lineWidth = 1;
             context.fill();
             context.stroke();
 
-            context.font = "12px Helvetica";
+            context.font = "10px Helvetica";
             context.fillStyle = "black";
-            context.fillText("Gene: " + name, box_x + 10,start_y - 17);
-            context.fillText("Position: " + start+ " to " +end, box_x + 10,start_y+3);
-            context.fillText("Genome: " + genome, box_x + 10,start_y+23);           
-            context.fillText("Organism: " + "anOrganism", box_x + 10,start_y+43);
+
+            context.fillText(geneText, box_x + 10,start_y - 17);
+            context.fillText(posText, box_x + 10,start_y+3);
+            context.fillText(genomeText, box_x + 10,start_y+23);           
+            context.fillText(organismText, box_x + 10,start_y+43);
 
         }
     }
@@ -609,10 +622,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function createGenomes(numOrthologues){
 
-        theModel.createGenome(result.current_gene.genome, result.current_gene.start, result.current_gene.end, result.current_gene.strand);
+        theModel.createGenome(result.current_gene.genome, result.current_gene.organism, result.current_gene.start, result.current_gene.end, result.current_gene.strand);
 
         for (var i=0; i<numOrthologues; i++){
-            theModel.createGenome(result.orthologues[i].genome, result.orthologues[i].start, result.orthologues[i].end, result.orthologues[i].strand);
+            theModel.createGenome(result.orthologues[i].genome, result.orthologues[i].organism, result.orthologues[i].start, result.orthologues[i].end, result.orthologues[i].strand);
 
         }
 
