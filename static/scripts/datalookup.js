@@ -386,7 +386,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             genome = this.id;
             start = this.genesForDisplay[j].start;
             end = this.genesForDisplay[j].end;
-            organism = this.organism; //set maximum size here
+            organism = this.organism; 
 
           }
         }
@@ -561,11 +561,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         context.lineWidth = 3;
 
         context.closePath();
-
-        //context.strokeStyle = "red";
-
         context.stroke();      
-
          
         context.fillStyle = startStyle;
         context.fill();

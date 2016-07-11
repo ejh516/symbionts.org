@@ -166,3 +166,7 @@ if 'species' not in genome_indices:
     genomes.create_index([("organism",1)], name='species')
 if 'full_text' not in feature_indices:
     features.create_index([("$**", 'text')], name='full_text')
+if 'start' not in feature_indices:
+    features.create_index([("genome", 1),("location.start", 1)], name='start')
+if 'end' not in feature_indices:
+    features.create_index([("genome", 1),("location.end", 1)], name='end')
