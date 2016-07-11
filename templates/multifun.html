@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <title>MultiFun symbionts.org</title>
+        {% include 'head.html' %}
+        <script type='text/javascript'>
+
+        </script>
+
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+ 
+  <script>
+  $(function() {
+    $( ".accordion").accordion({heightStyle: "content", collapsible: true, active: false});
+    // $( "#SubMultiFunMenu").accordion({heightStyle: "content", collapsible: true});
+  });
+  </script>
+
+    </head>
+    <body>
+        <div id='allContent'>
+            {% include 'header.html' %}
+            {% include 'menu.html' %}
+            <div id="MultiFunMenu" class = "accordion">
+            <h3>1. Metabolism</h3>
+                  <div id = "SubMultiFunMenu" class = "accordion">
+                  <h3>Subsection1</h3>
+                  <p>Sub</p>
+
+                  </div>
+            <h3>2. Information transfer</h3>
+                  <div>
+                    <p>
+                    Hello
+                    </p>
+                  </div>
+            <h3>3. Regulation</h3>
+                  <div>
+                    <p>
+                    Hello
+                    </p>
+                    <ul>
+                      <li>List item one</li>
+                      <li>List item two</li>
+                      <li>List item three</li>
+                    </ul>
+                  </div>
+              <h3>4. Transport</h3>
+                  <div>
+                    <p>
+                    Hello
+                    </p>
+                    <p>
+                    Hello
+                    </p>
+                  </div>
+            </div>
+            {% include 'footer.html' %}
+        </div>
+    </body>
+</html>

@@ -108,8 +108,6 @@ for orth in ecoliOrthologues:
           features.update({"_id":ObjectId(orth["sid"])},{"$set":{"MultiFun":multi}})
           features.update({"_id":ObjectId(orth["sid"])},{"$set":{"ecoli_orthologue_gene":gene}})
 
-          print("Updated: "+ orth["sid"])
-
 
 ecoliOrthologues = orthologues.find({"sgenome":"NC_000913.3"})
 
@@ -121,7 +119,6 @@ for orth in ecoliOrthologues:
           gene = ecolifeature["gene"]
           features.update({"_id":ObjectId(orth["qid"])},{"$set":{"MultiFun":multi}})
           features.update({"_id":ObjectId(orth["qid"])},{"$set":{"ecoli_orthologue_gene":gene}})
-          print("Updated: "+ orth["qid"])
 
 
 

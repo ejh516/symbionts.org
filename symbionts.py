@@ -40,10 +40,15 @@ def search_page():
                                 search_text="",
                                 species=all_species)
 
+# Genomes page
 @app.route("/genomes")
 def genomes():
-    #pass
     return render_template("genomes.html")
+
+# MultiFun page
+@app.route("/multifun")
+def multifun():
+    return render_template("multifun.html")
 
 # Contact page
 @app.route("/contact")

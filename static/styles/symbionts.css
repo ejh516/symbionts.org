@@ -81,6 +81,17 @@ div#mainContent {
     float: right;
 }
 
+div#MultiFunMenu {
+    width: 300px;
+    float: left;
+    list-style: none;
+    padding: none;
+    margin: 50;
+    display: block;
+    outline: none;
+}
+}
+
 div#footer {
     clear: both;
 }
