@@ -71,8 +71,6 @@ with open(UniProtFilename, "r") as UniProtFile:
                else:
                     UniProtGo[parsedline[1]] = [GO]
 
-# print(UniProtGo)
-
 
 # Go through E.Coli features? and get UniProt number, get GO numbers from it and map these to MultiFun refs. Add list of MultiFun refs to the feature.
 
