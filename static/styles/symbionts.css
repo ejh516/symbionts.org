@@ -81,16 +81,16 @@ div#mainContent {
     float: right;
 }
 
-div#MultiFunMenu {
+/*div#MultiFunMenu {
     width: 300px;
     float: right;
     list-style: none;
     padding: none;
-    margin: 50;
+    margin: 0;
     display: block;
     outline: none;
 
-}
+}*/
 
 div#footer {
     clear: both;
@@ -119,6 +119,17 @@ div#search_results table th {
     font-weight: 100;
     font-style: italic;
     font-size: 14pt;
+}
+
+div#multifun_search_results table {
+
+    font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-weight: 100;
+    font-style: italic;
+    font-size: 12pt;
+    width: 600px;
+    float: right;
+    overflow: hidden;
 }
 
 canvas {

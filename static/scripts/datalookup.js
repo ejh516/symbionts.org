@@ -248,6 +248,91 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
 
 }
 
+function format_multifun_results(returned_result, text_status, jqXHR, target_div) {
+
+    $("#spinning_wheel_div").remove();
+
+    multifun = returned_result.multifun;
+    count = returned_result.hit_count;
+    numSpecies = Object.keys(returned_result.features).length
+
+
+    // numSpecies = returned_result.features.length
+
+    target_div.append("<h3>" + multifun + "</h3>")
+    target_div.append("<h3> No. of features found: " + count + "</h3>")
+    target_div.append("<h3> No. of species found: " + numSpecies + "</h3>")
+
+    
+
+    if (returned_result.hit_count > 0) {
+
+        var header_row = "<tr>"
+
+        var species_limit = 3; //need to figure out how to make big table with all species
+        var row_limit = 10;
+        var count = 0;
+
+        for (var species in returned_result.features)
+        {
+            if (count < species_limit){ //need to not have to do this!!!
+            header_row = header_row + "<th>" + species + "</th>"
+            count++
+            }
+        }
+
+        header_row = header_row + "</tr>"
+
+        
+        target_div.append("<table><thead>" + header_row + 
+                            "</thead><tbody id=\"results_table\"></tbody></table>");
+
+        var table = $('#results_table');
+
+        var row = "<tr>"
+
+        row_count = 0;
+
+        for (var gene in returned_result.features["NC_000913.3"]) { //figure out why getting repeated genes - adding one and looping again...
+
+            if (row_count<row_limit)
+            {//fix this
+
+                        count = 0;//fix this
+
+                        for (var species in returned_result.features){
+
+                            if (gene in returned_result.features[species] && count<species_limit){
+                            row = row + "<td>" + returned_result.features[species][gene] + "</td>"
+                            count++
+                            }
+                            else if (count<species_limit)
+                            {
+                             row = row + "<td></td>"
+                             count++   
+                            }
+
+                        }
+
+                        row = row + "</tr>"
+
+                        table.append(row)
+                        row_count++
+                 }      
+
+        }
+
+
+    }
+
+    else{
+        target_div.append("<p>No results found.</p>")
+    }
+
+
+}
+
+
 
 
 function format_genomic_context_data(result, text_status, jqXHR, target_div, target_canvas) {

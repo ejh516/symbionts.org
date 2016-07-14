@@ -7,6 +7,7 @@ from pymongo import MongoClient
 
 import sys
 import os
+import re
 
 # Create the Flask app object that will be imported by the wsgi file
 
@@ -375,6 +376,40 @@ def get_genome_by_ID(genome_id):
     aResult["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
 
     return jsonify(aResult)
+
+@app.route("/multifun_info/<multifun_ref>")
+def get_mulitifun_info(multifun_ref):
+    genome = db.genome
+    features = db.genome.features
+
+
+    multifun = re.split(" ",multifun_ref)
+    multifun_number = multifun[0]
+
+    search_results = features.find({"MultiFun":{"$regex":"^" + multifun_number}})
+
+    hit_count = search_results.count()
+
+    feature_dict = {}
+    for feature in search_results:
+        if feature["genome"] in feature_dict:
+            if feature["genome"] == "NC_000913.3" and 'gene' in feature:
+                feature_dict[feature["genome"]][feature["gene"][0]] = feature["gene"]
+            elif 'ecoli_orthologue_gene' in feature and 'locus_tag' in feature:
+                feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = feature["locus_tag"]
+        else:
+            if feature["genome"] == "NC_000913.3" and 'gene' in feature:
+                feature_dict[feature["genome"]] = {}
+                feature_dict[feature["genome"]][feature["gene"][0]] = feature["gene"]
+            elif 'ecoli_orthologue_gene' in feature and 'locus_tag' in feature:
+                feature_dict[feature["genome"]] = {}
+                feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = feature["locus_tag"]
+                
+  
+    results = {"multifun": multifun_ref, "hit_count": hit_count,  "features": feature_dict}
+
+    return jsonify(results)
+
 
 
 #Helper functions to execute common queries on the database
