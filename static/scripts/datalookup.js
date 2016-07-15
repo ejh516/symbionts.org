@@ -248,7 +248,7 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
 
 }
 
-function format_multifun_results(returned_result, text_status, jqXHR, target_div) {
+function format_multifun_results(returned_result, text_status, jqXHR, target_div_headings, target_div) {
 
     $("#spinning_wheel_div").remove();
 
@@ -256,12 +256,8 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
     count = returned_result.hit_count;
     numSpecies = Object.keys(returned_result.features).length
 
-
-    // numSpecies = returned_result.features.length
-
-    target_div.append("<h3>" + multifun + "</h3>")
-    target_div.append("<h3> No. of features found: " + count + "</h3>")
-    target_div.append("<h3> No. of species found: " + numSpecies + "</h3>")
+    document.getElementById("search_value").innerHTML = "<b>" + multifun + ": </b>" + numSpecies + " species, " + count + " features found."
+    // document.getElementById("search_numbers").innerHTML = " No. species: " + numSpecies + " No. genes: " + count
 
     
 
@@ -269,16 +265,11 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
 
         var header_row = "<tr>"
 
-        var species_limit = 3; //need to figure out how to make big table with all species
-        var row_limit = 10;
-        var count = 0;
-
         for (var species in returned_result.features)
         {
-            if (count < species_limit){ //need to not have to do this!!!
+
             header_row = header_row + "<th>" + species + "</th>"
-            count++
-            }
+
         }
 
         header_row = header_row + "</tr>"
@@ -289,36 +280,27 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
 
         var table = $('#results_table');
 
-        var row = "<tr>"
+        for (var gene in returned_result.features["NC_000913.3"]) { 
 
-        row_count = 0;
-
-        for (var gene in returned_result.features["NC_000913.3"]) { //figure out why getting repeated genes - adding one and looping again...
-
-            if (row_count<row_limit)
-            {//fix this
-
-                        count = 0;//fix this
+                        var row = "<tr>"
 
                         for (var species in returned_result.features){
 
-                            if (gene in returned_result.features[species] && count<species_limit){
+                            if (gene in returned_result.features[species]){
                             row = row + "<td>" + returned_result.features[species][gene] + "</td>"
-                            count++
+                            
                             }
-                            else if (count<species_limit)
+                            else 
                             {
                              row = row + "<td></td>"
-                             count++   
+      
                             }
 
                         }
 
                         row = row + "</tr>"
 
-                        table.append(row)
-                        row_count++
-                 }      
+                        table.append(row) 
 
         }
 
