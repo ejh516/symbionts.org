@@ -379,9 +379,8 @@ def get_genome_by_ID(genome_id):
 
 @app.route("/multifun_info/<multifun_ref>")
 def get_mulitifun_info(multifun_ref):
-    genome = db.genome
+    genomes = db.genome
     features = db.genome.features
-
 
     multifun = re.split(" ",multifun_ref)
     multifun_number = multifun[0]
@@ -392,21 +391,28 @@ def get_mulitifun_info(multifun_ref):
 
     feature_dict = {}
     for feature in search_results:
-        if feature["genome"] in feature_dict:
-            if feature["genome"] == "NC_000913.3" and 'gene' in feature:
-                feature_dict[feature["genome"]][feature["gene"][0]] = feature["gene"]
-            elif 'ecoli_orthologue_gene' in feature and 'locus_tag' in feature:
-                feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = feature["locus_tag"]
-        else:
-            if feature["genome"] == "NC_000913.3" and 'gene' in feature:
-                feature_dict[feature["genome"]] = {}
-                feature_dict[feature["genome"]][feature["gene"][0]] = feature["gene"]
-            elif 'ecoli_orthologue_gene' in feature and 'locus_tag' in feature:
-                feature_dict[feature["genome"]] = {}
-                feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = feature["locus_tag"]
+
+        if feature["genome"] not in feature_dict:
+            feature_dict[feature["genome"]] = {}
+        if feature["genome"] == "NC_000913.3" and 'gene' in feature:
+            feature_dict[feature["genome"]][feature["gene"][0]] = feature["gene"]
+        elif 'ecoli_orthologue_gene' in feature and 'locus_tag' in feature:
+            feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = feature["locus_tag"]
+
+    # get species name from genome id...also specify if it's a chromosome or plasmid
+    organisms = {}
+    for genome in feature_dict:
+        replicon_result =  genomes.find_one({"_id":genome})
+        organisms[genome] = {}
+        if 'organism' in replicon_result:
+                organisms[genome]["organism"] = replicon_result["organism"]
+        if 'replicon_type' in replicon_result:
+                organisms[genome]["replicon_type"] = replicon_result["replicon_type"]    
                 
   
-    results = {"multifun": multifun_ref, "hit_count": hit_count,  "features": feature_dict}
+    results = {"multifun": multifun_ref, "hit_count": hit_count,  "organisms": organisms, "features": feature_dict}
+
+
 
     return jsonify(results)
 

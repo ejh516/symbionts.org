@@ -256,8 +256,8 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
     count = returned_result.hit_count;
     numSpecies = Object.keys(returned_result.features).length
 
-    document.getElementById("search_value").innerHTML = "<b>" + multifun + ": </b>" + numSpecies + " species, " + count + " features found."
-    // document.getElementById("search_numbers").innerHTML = " No. species: " + numSpecies + " No. genes: " + count
+    document.getElementById("search_value").innerHTML = "<b>" + multifun + ": </b>" + numSpecies + " replicons, " + count + " genes found."
+
 
     
 
@@ -265,10 +265,13 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
 
         var header_row = "<tr>"
 
-        for (var species in returned_result.features)
-        {
 
-            header_row = header_row + "<th>" + species + "</th>"
+        for (var species in returned_result.features)//need to somehow insert organism names as well - maybe also whether chromosome or plsamid
+        {
+            species_name = returned_result.organisms[species]["organism"]
+            replicon_type = returned_result.organisms[species]["replicon_type"]
+
+            header_row = header_row + "<th><a href=\"/genomedetails/" + species + "\">" + species + "</br> (" + replicon_type + " of " + species_name + ") </a></th>"
 
         }
 
