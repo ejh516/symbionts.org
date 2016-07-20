@@ -111,7 +111,7 @@ def full_text_search(genome, search_text):
     if results['hit_count'] > 0:
         raw_results = []
         for result in features_cursor:
-            aResult = {"_id": "Undefined.","genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined.", "organism": "Undefined."}
+            aResult = {"_id": "Undefined.","genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined.", "product":"Undefined.", "organism": "Undefined."}
             if '_id' in result:
                 aResult["_id"] = str(result['_id'])
             if 'genome' in result:
@@ -125,7 +125,11 @@ def full_text_search(genome, search_text):
             if 'product' in result:
                 aResult["product"] = result['product'][0]
 
-            raw_results.append(aResult)
+                # only add serach result if a locus_tag exists
+            if aResult['locus_tag'] != "Undefined.": 
+                raw_results.append(aResult)
+            else:
+                results['hit_count'] = int(results['hit_count'])-1
             results['results'] = raw_results
 
     return jsonify(results)
