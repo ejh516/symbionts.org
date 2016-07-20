@@ -111,12 +111,6 @@ div#search_results table th {
     font-size: 14pt;
 }
 
-div#multifun_search_results {
-margin: auto;
-text-indent: 350px;
-/*overflow: auto;*/
-}
-
 div#multifun_search_table {
 
     font-family: 'Roboto Slab', 'Helvetica Neue', 'Helvetica', sans-serif;
@@ -125,8 +119,19 @@ div#multifun_search_table {
     font-size: 12pt;
     width: 600px;
     float: right;
-    overflow: scroll;
-    border:1px solid black;
+    max-height: 1000px;
+    overflow: auto;
+    border:1px solid lightgrey; border-radius: 5px;
+
+}
+
+.wrapper1 {   width: 600px;
+  float: right; height: 80px; }
+
+.div1 {
+  width:600px;
+  height: 80px;
+  float: right;
 }
 
 canvas {
@@ -136,7 +141,6 @@ canvas {
 }
 
 button {
-
   float: right;
 
 }

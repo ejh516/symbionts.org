@@ -248,7 +248,7 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
 
 }
 
-function format_multifun_results(returned_result, text_status, jqXHR, target_div_headings, target_div) {
+function format_multifun_results(returned_result, text_status, jqXHR, target_div) {
 
     $("#spinning_wheel_div").remove();
 
@@ -257,31 +257,51 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
     numSpecies = Object.keys(returned_result.features).length
 
     document.getElementById("search_value").innerHTML = "<b>" + multifun + ": </b>" + numSpecies + " replicons, " + count + " genes found."
-
-
     
 
     if (returned_result.hit_count > 0) {
 
-        var header_row = "<tr>"
+        var rep_id_row = "<tr>"
+        var rep_desc_row = "<tr>"
+        var genes_row = "<tr><td><b>Genes:</b></td>"
+        var replicons_row = "<tr><td><b>Replicons:</b></td>"
+
+        for(i = 1; i<numSpecies; i++){
+
+            genes_row = genes_row + "<td></td>"
+            replicons_row = replicons_row + "<td></td>"
+        }
 
 
-        for (var species in returned_result.features)//need to somehow insert organism names as well - maybe also whether chromosome or plsamid
-        {
+        for (var species in returned_result.features){
             species_name = returned_result.organisms[species]["organism"]
             replicon_type = returned_result.organisms[species]["replicon_type"]
 
-            header_row = header_row + "<th><a href=\"/genomedetails/" + species + "\">" + species + "</br> (" + replicon_type + " of " + species_name + ") </a></th>"
+            if (replicon_type == 'Chromosome'){
+                rep_id_row = rep_id_row + "<td><a href=\"/genomedetails/" + species + "\">" + species + "</a></td>"
+            }
 
+            else{
+                rep_id_row = rep_id_row + "<td><a href=\"/plasmiddetails/" + species + "\">" + species + "</a></td>"
+            }
+            
+            rep_desc_row = rep_desc_row + "<td> " + replicon_type + " of " + format_species_name(species_name) + "</p></td>"
         }
 
-        header_row = header_row + "</tr>"
+        rep_id_row = rep_id_row + "</tr>"
+        rep_desc_row = rep_desc_row + "</tr>"
+        genes_row = genes_row + "</tr>"
+        replicons_row = replicons_row + "</tr>"
 
         
-        target_div.append("<table><thead>" + header_row + 
-                            "</thead><tbody id=\"results_table\"></tbody></table>");
+        target_div.append("<table><thead>"+replicons_row+"</thead><tbody id=\"results_table\"></tbody></table>");
+        
 
         var table = $('#results_table');
+
+        table.append(rep_desc_row)
+        table.append(rep_id_row)
+        table.append(genes_row)
 
         for (var gene in returned_result.features["NC_000913.3"]) { 
 
@@ -290,7 +310,7 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
                         for (var species in returned_result.features){
 
                             if (gene in returned_result.features[species]){
-                            row = row + "<td>" + returned_result.features[species][gene] + "</td>"
+                            row = row + "<td><a href=\"/genedetails/" + returned_result.features[species][gene][1] + "\">" + returned_result.features[species][gene][0] + "</td>"
                             
                             }
                             else 
@@ -311,7 +331,7 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
     }
 
     else{
-        target_div.append("<p>No results found.</p>")
+        target_div.append("<p> No results found.</p>")
     }
 
 

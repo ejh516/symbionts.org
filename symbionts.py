@@ -395,11 +395,11 @@ def get_mulitifun_info(multifun_ref):
         if feature["genome"] not in feature_dict:
             feature_dict[feature["genome"]] = {}
         if feature["genome"] == "NC_000913.3" and 'gene' in feature:
-            feature_dict[feature["genome"]][feature["gene"][0]] = feature["gene"]
+            feature_dict[feature["genome"]][feature["gene"][0]] = [feature["gene"], str(feature["_id"])]
         elif 'ecoli_orthologue_gene' in feature and 'locus_tag' in feature:
-            feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = feature["locus_tag"]
+            feature_dict[feature["genome"]][feature["ecoli_orthologue_gene"][0]] = [feature["locus_tag"], str(feature["_id"])]
 
-    # get species name from genome id...also specify if it's a chromosome or plasmid
+
     organisms = {}
     for genome in feature_dict:
         replicon_result =  genomes.find_one({"_id":genome})
@@ -407,7 +407,7 @@ def get_mulitifun_info(multifun_ref):
         if 'organism' in replicon_result:
                 organisms[genome]["organism"] = replicon_result["organism"]
         if 'replicon_type' in replicon_result:
-                organisms[genome]["replicon_type"] = replicon_result["replicon_type"]    
+                organisms[genome]["replicon_type"] = replicon_result["replicon_type"].capitalize()    
                 
   
     results = {"multifun": multifun_ref, "hit_count": hit_count,  "organisms": organisms, "features": feature_dict}
