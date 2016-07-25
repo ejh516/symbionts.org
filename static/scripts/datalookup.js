@@ -253,20 +253,48 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
     $("#spinning_wheel_div").remove();
 
     multifun = returned_result.multifun;
+
+    if (multifun.length>65){
+        multifun = multifun.substring(0,60)+"... ";
+    }
     count = returned_result.hit_count;
     numSpecies = Object.keys(returned_result.features).length
+    var showAllGenes =document.getElementById("show_all_genes_checkbox").checked;
 
-    document.getElementById("search_value").innerHTML = "<b>" + multifun + ": </b>" + numSpecies + " replicons, " + count + " genes found."
+
+    $("#search_value").html("<b>" + multifun + ": </b>" + numSpecies + " replicons, " + count + " genes found.")
+
+    document.getElementById("show_all_genes").addEventListener("change", setShowAllGenes, true);
+
+    $("#multifun_table").remove();
+    fillTable();
+
+    function setShowAllGenes(){
+
+
+        if (showAllGenes ==false){
+            showAllGenes = true;
+        }
+        else{
+            showAllGenes = false;
+        }
+
+        $("#multifun_table").remove();
+        fillTable();
+    }
+
+
+    function fillTable(){
     
-
     if (returned_result.hit_count > 0) {
 
+       
         var rep_id_row = "<tr>"
         var rep_desc_row = "<tr>"
         var genes_row = "<tr><td><b>Genes:</b></td>"
         var replicons_row = "<tr><td><b>Replicons:</b></td>"
 
-        for(i = 1; i<numSpecies; i++){
+        for(var i = 1; i<numSpecies; i++){
 
             genes_row = genes_row + "<td></td>"
             replicons_row = replicons_row + "<td></td>"
@@ -294,24 +322,33 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
         replicons_row = replicons_row + "</tr>"
 
         
-        target_div.append("<table><thead>"+replicons_row+"</thead><tbody id=\"results_table\"></tbody></table>");
+        target_div.append("<table id = \"multifun_table\"><thead>"+replicons_row+"</thead><tbody id=\"results_table_body\"></tbody></table>");
         
 
-        var table = $('#results_table');
+        table = $('#results_table_body');
 
         table.append(rep_desc_row)
         table.append(rep_id_row)
         table.append(genes_row)
 
-        for (var gene in returned_result.features["NC_000913.3"]) { 
+        }
+
+    else{
+        target_div.append("<p> No results found.</p>")
+    }
+
+
+    for (var gene in returned_result.features["NC_000913.3"]) { 
 
                         var row = "<tr>"
+
+                        var numGenesInRow = 0;
 
                         for (var species in returned_result.features){
 
                             if (gene in returned_result.features[species]){
                             row = row + "<td><a href=\"/genedetails/" + returned_result.features[species][gene][1] + "\">" + returned_result.features[species][gene][0] + "</td>"
-                            
+                            numGenesInRow += 1;
                             }
                             else 
                             {
@@ -323,18 +360,14 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
 
                         row = row + "</tr>"
 
+                        if(showAllGenes == true || numGenesInRow>1){
                         table.append(row) 
+                        }
 
         }
 
 
     }
-
-    else{
-        target_div.append("<p> No results found.</p>")
-    }
-
-
 }
 
 
@@ -957,7 +990,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     function showScale(){
 
         var s = String("--------- " + (scale*10/4).toFixed(2)).slice(-5);
-        document.getElementById("scale").innerHTML = "|---------------- " + s + "kb ----------------|";
+        $("#scale").html("|---------------- " + s + "kb ----------------|");
 
     }
 

@@ -125,14 +125,11 @@ div#multifun_search_table {
 
 }
 
-.wrapper1 {   width: 600px;
-  float: right; height: 80px; }
+.wrapper1 {   
+width: 600px;
+  float: right; 
+  height: 80px; }
 
-.div1 {
-  width:600px;
-  height: 80px;
-  float: right;
-}
 
 canvas {
   display:block;
@@ -140,8 +137,21 @@ canvas {
   float: right;
 }
 
-button {
+button#zoom_in_button {
   float: right;
+
+}
+
+button#zoom_out_button {
+  float: right;
+
+}
+
+form#show_all_genes{
+
+position: absolute; 
+top: 230;
+right: 200;
 
 }
 
