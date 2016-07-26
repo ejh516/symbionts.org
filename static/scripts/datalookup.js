@@ -254,8 +254,8 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
 
     multifun = returned_result.multifun;
 
-    if (multifun.length>65){
-        multifun = multifun.substring(0,60)+"... ";
+    if (multifun.length>80){
+        multifun = multifun.substring(0,75)+"... ";
     }
     count = returned_result.hit_count;
     numSpecies = Object.keys(returned_result.features).length

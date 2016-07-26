@@ -128,7 +128,7 @@ div#multifun_search_table {
 .wrapper1 {   
 width: 600px;
   float: right; 
-  height: 80px; }
+  height: 120px; }
 
 
 canvas {
@@ -149,9 +149,7 @@ button#zoom_out_button {
 
 form#show_all_genes{
 
-position: absolute; 
-top: 230;
-right: 200;
+font-size:10pt;
 
 }
 
