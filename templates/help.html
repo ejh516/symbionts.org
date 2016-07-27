@@ -12,14 +12,14 @@
             <div id = 'mainContent'>
                 <h1>Help</h1>
                 <h2>Search:</h2>
-                <p>Perform a text-based search of all genes and coding sequences in the database. The search returns all features containing the search term...<br>
-                Selecting a particular gene allows you to view further details about the coding sequence, including its orthologues in other genomes, and to scroll through the genome to view neighbouring coding sequences. 
+                <p>Perform a text-based search of all genes and coding sequences (CDSs) in the database. The search returns all features containing the search term in any field. e.g. searching for 'leuS' returns genes and CDSs in the selected species with the name 'leuS' or with 'leuS' mentioned in any other field. Similarly, searching for 'synthetase' returns any features with a synthetase as a gene product or with 'synthetase' mentioned in any other field.
+                Selecting a particular gene or CDS allows the user to view further details of that feature and to scroll through the genome to view neighbouring coding sequences. In the case of CDSs, orthologues in other genomes are displayed below the genome of interest.
                 </p>
                 <h2>Genomes:</h2>
                 <p>Displays details of all genomes currently in the database.<br>
                 </p>
                 <h2>MultiFun:</h2>
-                <p>View genes and coding sequences based on the <i>E.coli</i> 'MultiFun' (multi-functional) classification system. <br>
+                <p>View genes/CDSs based on the <i>E.coli</i> 'MultiFun' (multi-functional) classification system. The leftmost column shows all <i> E.coli </i> CDSs for the selected classification (e.g. '1 Metabolism' or '7.4 Outer membrane'). The columns on the right show the orthologue CDSs in other replicons (either chromosome or plasmid of another species). By default, only the <i>E.coli</i> CDSss which have orthologues are displayed, but selecting the 'Show all <i>E.coli</i> genes' checkbox displays all CDSs.<br>
                 </p>               
            </div>
             {% include 'footer.html' %}
