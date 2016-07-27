@@ -54,12 +54,12 @@ def multifun():
 # Contact page
 @app.route("/contact")
 def contacts():
-    pass
+    return render_template("contact.html")
 
 # Help page
 @app.route("/help")
 def help():
-    pass
+    return render_template("help.html")
 
 # Gene details page
 @app.route("/genedetails/<gene_id>")
@@ -125,7 +125,7 @@ def full_text_search(genome, search_text):
             if 'product' in result:
                 aResult["product"] = result['product'][0]
 
-                # only add serach result if a locus_tag exists
+                # only add search result if a locus_tag exists
             if aResult['locus_tag'] != "Undefined.": 
                 raw_results.append(aResult)
             else:
