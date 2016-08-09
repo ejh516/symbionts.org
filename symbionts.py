@@ -12,7 +12,7 @@ import re
 # Create the Flask app object that will be imported by the wsgi file
 
 app = Flask(__name__)
-m_connection = MongoClient()
+m_connection = MongoClient(host="c2d2fs0.york.ac.uk")
 db = m_connection.symbiont
 
 #
