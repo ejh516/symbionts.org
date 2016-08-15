@@ -376,8 +376,8 @@ def get_genome_by_ID(genome_id):
     aResult["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
     aResult["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
     aResult["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': genome_id}).count()
-    aResult["numTRNAs"]= features.find({'type': 'tRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
-    aResult["numRRNAs"]= features.find({'type': 'rRNA', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
+    aResult["numTRNAs"]= features.find({'type': 'tRNA','pseudo':{"$exists":0},'genome': genome_id}).count()
+    aResult["numRRNAs"]= features.find({'type': 'rRNA','pseudo':{"$exists":0},'genome': genome_id}).count()
 
     return jsonify(aResult)
 
