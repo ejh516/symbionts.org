@@ -583,14 +583,22 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     Gene.prototype.checkIfHoveredOver = function(x_coord, y_coord)
     {
+        var oldValue = this.hovered;
         if ((x_coord>=this.canvasCovered[0]) && x_coord<=(this.canvasCovered[0]+this.canvasCovered[2]) && y_coord>=this.canvasCovered[1] && y_coord<=(this.canvasCovered[1]+this.canvasCovered[3]))
 
         {
             this.hovered = true;
-
         }
         else{
             this.hovered = false;
+        }
+
+        if (oldValue != this.hovered)
+        {
+            return true;
+        }
+        else{
+            return false;
         }
     }
 
@@ -705,6 +713,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 "url": "/gene_context_info/" + genome_ID +"/" + start_pos+ "/" +end_pos, 
                 "success": function(data, status_text, jqXHR) {
                                     format_gene_list(data, status_text, jqXHR);
+                                    draw(); //only draw once gene lists have been refreshed
                            },
                 "dataType": 'json'
                });
@@ -822,6 +831,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var evt = e || event;
         dragging = true;
         lastX = evt.offsetX;
+
+
     }
 
     can.onmousemove = function (e) {
@@ -834,6 +845,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             start_position = start_position - (10*delta)*scale;
             end_position = end_position - (10*delta)*scale;
+
             draw();
 
          
@@ -848,7 +860,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             {
                 for (var j = 0; j<theModel.genomeList[i].genesForDisplay.length; j++)
                 {
-                    theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(x_coord, y_coord); 
+                    var change  = theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(x_coord, y_coord); 
+
+                    if (change)//if a gene goes from not hoevered to hoverered or vice versa need to redraw
+                    {
+                        draw();
+                    }
+                    
                 }
             }
 
@@ -1034,19 +1052,21 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
               }
 
         }
-  
-        setInterval(draw,100); 
 
     }
-
 
     can.addEventListener("mousewheel", mouseWheelHandler, false);
     document.getElementById("zoom_in_button").addEventListener("click", zoomIn, false);
     document.getElementById("zoom_out_button").addEventListener("click", zoomOut, false);
 
-    draw();
-
     showScale();
+
+
+
+
+
+
+
 
 
 }
