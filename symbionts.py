@@ -262,7 +262,18 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
     features = db.genome.features
 
     # find CDSs only for now
-    results = features.find({"genome": genome_id, "type": "CDS", "$or":[{"location.start":{"$lt":float(end_pos), "$gt":float(start_pos)}},{"location.end":{"$lt":float(end_pos), "$gt":float(start_pos)}}]}) 
+    # results = features.find({"genome": genome_id, "type": "CDS", "$or":[{"location.start":{"$lt":float(end_pos), "$gt":float(start_pos)}},{"location.end":{"$lt":float(end_pos), "$gt":float(start_pos)}}]}) 
+
+    # results = features.find({"genome": genome_id, "type": "CDS", "$or":[{"location.start":{"$lt":float(end_pos), "$gt":float(start_pos)}},
+    #                                                                     {"location.end":{"$lt":float(end_pos), "$gt":float(start_pos)}},
+    #                                                                     {"$and":[{"location.start":{"$lt":float(start_pos)}}, 
+    #                                                                                 {"location.end": {"$gt":float(end_pos)}}
+    #                                                                             ]
+    #                                                                     }
+    #                                                                     ]
+    #                         }) 
+
+    results = features.find({"genome": genome_id, "type": "CDS", "$or":[{"location.start":{"$lt":float(end_pos), "$gt":float(start_pos)}},{"location.end":{"$lt":float(end_pos), "$gt":float(start_pos)}},{"$and":[{"location.start":{"$lt":float(start_pos)}}, {"location.end": {"$gt":float(end_pos)}}]}]}) 
 
     geneList = []
 

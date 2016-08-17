@@ -186,7 +186,8 @@ function format_basic_gene_data(result, text_status, jqXHR, target_div) {
     
     table.append("<tr><td> Species </td><td>" + format_species_name(result.organism) + "</td></tr>");
     table.append("<tr><td> Type </td><td>" + result.type + "</td></tr>");
-    table.append("<tr><td> Name </td><td>" + result.gene + "</td></tr>");
+    table.append("<tr><td> Gene Name </td><td>" + result.gene + "</td></tr>");
+    table.append("<tr><td> Locus Tag </td><td>" + result.locus_tag + "</td></tr>");
     table.append("<tr><td> Location </td><td> <i>Start:</i> " + result.location.start + " <i>End:</i> " + result.location.end + " <i>Strand:</i> " + result.location.strand + "</td></tr>");
     table.append("<tr><td> Function </td><td>" + result.function + "</td></tr>");
     table.append("<tr><td> Product </td><td>" + result.product + "</td></tr>");
@@ -375,7 +376,6 @@ function format_multifun_results(returned_result, text_status, jqXHR, target_div
 
 function format_genomic_context_data(result, text_status, jqXHR, target_div, target_canvas) {
 
-    //MODEL SECTION...?
 
     function Model (genomeList){
       this.genomeList = genomeList; 
@@ -396,6 +396,8 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.displayName = displayName;  
         this.start = start;
         this.end = end;
+        this.original_start = start;
+        this.original_end = end;
         this.length = end-start;
         this.strand = strand;
         this.flipped = false;
@@ -464,8 +466,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 this.genesForDisplay[j].flip(this.gene_of_interest_start_point);
             }
 
-            this.gene_of_interest_start_point = this.gene_of_interest_end_point;
-
         }
 
         //first write genome name
@@ -484,17 +484,23 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var start = "0";
         var end = "0";
         var organism = "???";
+        var start_point = this.gene_of_interest_start_point;
+        
+        if (this.orientation == "-1")
+        {
+            start_point = this.gene_of_interest_start_point - (this.gene_of_interest_end_point - this.gene_of_interest_start_point);
+        }
 
         for (var j=0; j< this.genesForDisplay.length; j++) {
 
             specialStyle = false;
 
-            if(this.genesForDisplay[j].start == this.gene_of_interest_start_point)
+            if(this.genesForDisplay[j].start == start_point)
             {
                 specialStyle = true;
             }
 
-          this.genesForDisplay[j].draw(context, this.gene_of_interest_start_point, start_y, startStyle, specialStyle, scaling); 
+          this.genesForDisplay[j].draw(context, start_point, start_y, startStyle, specialStyle, scaling); 
 
   
 
@@ -502,13 +508,13 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
           { 
 
             drawBox = true; 
-            var x = (this.genesForDisplay[j].start-(this.gene_of_interest_start_point-5000*scaling))/(10*scaling);
+            var x = (this.genesForDisplay[j].start-(start_point-5000*scaling))/(10*scaling);
             box_x = x + this.genesForDisplay[j].length/(2*10*scaling);
 
             name = this.genesForDisplay[j].displayName;
             genome = this.id;
-            start = this.genesForDisplay[j].start;
-            end = this.genesForDisplay[j].end;
+            start = this.genesForDisplay[j].original_start;
+            end = this.genesForDisplay[j].original_end;
             organism = this.organism; 
 
           }
@@ -715,6 +721,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                                     format_gene_list(data, status_text, jqXHR);
                                     draw(); //only draw once gene lists have been refreshed
                            },
+                "error": function(){ alert ("Ajax call failed for genome_ID: " + genome_ID);},           
                 "dataType": 'json'
                });
         
@@ -733,14 +740,18 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             for (var i = 0; i<theModel.genomeList.length; i++){
 
-                start_pos = theModel.genomeList[i].gene_of_interest_start_point + start_p;
-                end_pos = theModel.genomeList[i].gene_of_interest_start_point + end_p;
+                gois = theModel.genomeList[i].gene_of_interest_start_point;
+                goie = theModel.genomeList[i].gene_of_interest_end_point;
 
-                if (theModel.genomeList[i].orientation == "-1") // need to find genes on other side of genome and then flip them when drawing them
+                start_pos = gois + start_p;
+                end_pos = gois + end_p;
+
+                if (theModel.genomeList[i].orientation == "-1") 
                 {
-                        temp1 = start_pos + 2*(theModel.genomeList[i].gene_of_interest_start_point - start_pos);
-                        start_pos = end_pos + 2*(theModel.genomeList[i].gene_of_interest_start_point - end_pos);
-                        end_pos = temp1;
+
+                    end_pos =  goie - start_p;
+                    start_pos = goie - end_p;
+
                 }
 
                 getGeneList(theModel.genomeList[i].id, start_pos,end_pos );
@@ -862,7 +873,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 {
                     var change  = theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(x_coord, y_coord); 
 
-                    if (change)//if a gene goes from not hoevered to hoverered or vice versa need to redraw
+                    if (change)//if a gene goes from not hovered to hovered or vice versa need to redraw
                     {
                         draw();
                     }
@@ -901,26 +912,26 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    function mouseWheelHandler(e){
+    // function mouseWheelHandler(e){
 
-        var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-        var prev_scale = scale;
+    //     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+    //     var prev_scale = scale;
 
-        if (delta > 0) { 
+    //     if (delta > 0) { 
 
-        zoomIn();
+    //     zoomIn();
 
-        }
-        if (delta < 0) 
-        { 
+    //     }
+    //     if (delta < 0) 
+    //     { 
 
-        zoomOut();
-        }
+    //     zoomOut();
+    //     }
 
 
-        return false;
+    //     return false;
 
-    }
+    // }
 
 
     function zoomIn()
@@ -1055,7 +1066,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     }
 
-    can.addEventListener("mousewheel", mouseWheelHandler, false);
+    //can.addEventListener("mousewheel", mouseWheelHandler, false); //removed for being irritating
     document.getElementById("zoom_in_button").addEventListener("click", zoomIn, false);
     document.getElementById("zoom_out_button").addEventListener("click", zoomOut, false);
 
