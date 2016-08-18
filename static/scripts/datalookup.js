@@ -29,6 +29,9 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
                var species_name = format_species_name(all_species[feature.genome]);
                row_cells = row_cells + "<td>" + species_name + "</td>";
             }
+            else{
+                row_cells = row_cells + "<td></td>"
+            }
             row_cells = row_cells + "<td>" + feature.product + "</td>";
             table.append("<tr>" + row_cells + "</tr>");
         }
@@ -468,10 +471,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         }
 
+        var start_point = this.gene_of_interest_start_point;
+
         //first write genome name
         context.fillStyle = "rgb(175,175,175)";
         context.font = "12px Helvetica";
-        context.fillText(this.id, 500*scaling+2,start_y+50);
+        // context.fillText(this.organism, 0 ,start_y+50);
+
+         //var start_x = (this.start-(x_offset-5000*scaling))/(10*scaling);
 
 
 
@@ -484,7 +491,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var start = "0";
         var end = "0";
         var organism = "???";
-        var start_point = this.gene_of_interest_start_point;
+        
         
         if (this.orientation == "-1")
         {
@@ -721,7 +728,9 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                                     format_gene_list(data, status_text, jqXHR);
                                     draw(); //only draw once gene lists have been refreshed
                            },
-                "error": function(){ alert ("Ajax call failed for genome_ID: " + genome_ID);},           
+                "error": function(){ 
+                    // alert ("Ajax call failed for genome_ID: " + genome_ID);
+                },           
                 "dataType": 'json'
                });
         
@@ -848,6 +857,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     can.onmousemove = function (e) {
         var evt = e || event;
+        var rect = can.getBoundingClientRect();
+        var x_coord= start_position/(10*scale) + (e.clientX - rect.left) + 500;
+        var y_coord= (e.clientY - rect.top);
+
+ //alert(x_coord + " " + y_coord)
+
         if (dragging) {
             var delta = evt.offsetX - lastX;
             translated += delta;
@@ -858,14 +873,11 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             end_position = end_position - (10*delta)*scale;
 
             draw();
-
          
             }
         else{
 
-            var rect = can.getBoundingClientRect();
-            var x_coord= start_position/(10*scale) + (e.clientX - rect.left) + 500;
-            var y_coord= (e.clientY - rect.top);
+
 
             for (var i = 0; i<theModel.genomeList.length; i++)
             {
@@ -909,6 +921,18 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         //refresh gene lists after dragging
         refreshGeneLists(start_position, end_position);
         draw();
+
+    }
+
+    //need this function for when mouse is released outside canvas after dragging. Maybe there is a better way of hanndling this. As genelists are now refreshed when any link is clicked.
+    window.onmouseup = function (e) {
+
+        dragging = false;
+
+        //refresh gene lists after dragging
+        refreshGeneLists(start_position, end_position);
+        draw();
+
 
     }
 
@@ -977,7 +1001,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function zoomOut()
     {
-        //alert("zooming out");
 
         var prev_scale = scale;
         if (scale<=2.0)
@@ -1043,6 +1066,42 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         {
         ctx.font="15px Helvetica";
         ctx.fillText(((i-(5000*scale))/1000) + "kb", 5+(i/(10*scale)),20);
+
+        if(theModel.genomeList.length>0){
+
+            for (var j = 0; j < theModel.genomeList.length; j++) {
+
+                y_coord = (j*100) + 40;
+
+                var words = theModel.genomeList[j].organism.split(" ");
+                var italics = "";
+                var noitalics = "";
+
+                if (words.length > 1) {
+                    italics = words[0] + " " + words[1];
+                    for (var k = 2; k < words.length; k++) {
+                            noitalics = noitalics + " " + words[k];
+                    }
+
+                }
+
+                  ctx.fillStyle = "rgb(175,175,175)";
+                    ctx.font = "italic 12px Helvetica";
+                    ctx.fillText(italics, 5+(i/(10*scale)),y_coord+50);//theModel.genomeList[j].start_y+50
+
+                    ital = ctx.measureText(italics);
+                    wid = ital.width;
+
+                    ctx.font = "12px Helvetica"; 
+                    // ctx.fillText(noitalics, 5+(i/(10*scale)) + ital_width*10.2 ,y_coord+50);//theModel.genomeList[j].start_y+50   
+
+                    ctx.fillText(noitalics, 5+(i/(10*scale)) + wid ,y_coord+50);//theModel.genomeList[j].start_y+50                   
+
+
+            }
+        }
+
+
         }
 
 
