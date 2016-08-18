@@ -861,8 +861,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var x_coord= start_position/(10*scale) + (e.clientX - rect.left) + 500;
         var y_coord= (e.clientY - rect.top);
 
- //alert(x_coord + " " + y_coord)
-
         if (dragging) {
             var delta = evt.offsetX - lastX;
             translated += delta;
@@ -885,7 +883,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                 {
                     var change  = theModel.genomeList[i].genesForDisplay[j].checkIfHoveredOver(x_coord, y_coord); 
 
-                    if (change)//if a gene goes from not hovered to hovered or vice versa need to redraw
+                    if (change)//if a gene goes from not hovered to unhovered or vice versa need to redraw
                     {
                         draw();
                     }
@@ -1087,15 +1085,14 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                   ctx.fillStyle = "rgb(175,175,175)";
                     ctx.font = "italic 12px Helvetica";
-                    ctx.fillText(italics, 5+(i/(10*scale)),y_coord+50);//theModel.genomeList[j].start_y+50
+                    ctx.fillText(italics, 5+(i/(10*scale)),y_coord+50);
 
                     ital = ctx.measureText(italics);
                     wid = ital.width;
 
-                    ctx.font = "12px Helvetica"; 
-                    // ctx.fillText(noitalics, 5+(i/(10*scale)) + ital_width*10.2 ,y_coord+50);//theModel.genomeList[j].start_y+50   
+                    ctx.font = "12px Helvetica";  
 
-                    ctx.fillText(noitalics, 5+(i/(10*scale)) + wid ,y_coord+50);//theModel.genomeList[j].start_y+50                   
+                    ctx.fillText(noitalics, 5+(i/(10*scale)) + wid ,y_coord+50);                 
 
 
             }
@@ -1107,13 +1104,25 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         if(theModel.genomeList.length>0){
 
-            //draw main genome first
-            theModel.genomeList[0].draw(ctx, 40, "rgb(50,50,50)", scale);
-
             //then draw orthologue genomes
-            for (var i = 1; i < theModel.genomeList.length; i++) {
+            for (var i = 0; i < theModel.genomeList.length; i++) {
 
-                fillStyle = "rgb(80,140,150)";
+                org = theModel.genomeList[i].organism;
+
+                unique_colour = Math.round((ctx.measureText(org)).width);
+
+                hash = org.charCodeAt(0) + org.charCodeAt(org.length/2) + org.charCodeAt(org.length-2)
+
+                red = Math.abs(hash-200)*2 ;
+                green = Math.abs(255-red) ;
+                blue = (red + green)/2;
+
+                red = Math.round((3*red + 170)/4);
+                green = Math.round((3*blue + 190)/4);
+                blue = Math.round((3*green + 220)/4);
+
+
+                fillStyle = "rgb(" + red + ", " + green + ", " + blue + ")";
 
                 y_coord = (i*100) + 40;
 
