@@ -14,7 +14,7 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
 
     if (result.hit_count > 0) {
 
-        target_div.append("<table><thead>" + header_row + 
+        target_div.append("<table id = search_results_table><thead>" + header_row + 
                             "</thead><tbody id=\"results_table\"></tbody></table>");
 
     // Get a reference to the body of the table, then append a row for each result
@@ -35,6 +35,9 @@ function format_search_results(result, text_status, jqXHR, target_div, all_speci
             row_cells = row_cells + "<td>" + feature.product + "</td>";
             table.append("<tr>" + row_cells + "</tr>");
         }
+
+            var newTableObject = document.getElementById("search_results_table");
+            sorttable.makeSortable(newTableObject);
     }
 }
 
@@ -60,10 +63,11 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
      target_div.append("<h3>" + result.hit_count + " Genomes found</h3>");
 
     if (result.hit_count > 0) {
-        target_div.append("<table><thead>" + header_row + 
-                            "</thead><tbody id=\"results_table\"></tbody></table>");
+        target_div.append("<table class = 'sortable' id = genome_results_table><thead>" + header_row + 
+                            "</thead><tbody id=\"results_body\"></tbody></table>");
 
-        var table = $('#results_table');
+        var table_body = $('#results_body');
+        
 
         for (var i=0; i < result.results.length; i++) {
             genome = result.results[i];
@@ -76,9 +80,12 @@ function format_genome_results(result, text_status, jqXHR, target_div) {
             row_cells = row_cells + "<td>" + tax + "</td>";
             row_cells = row_cells + "<td>" + genome.numPlasmids + "</td>";
             row_cells = row_cells + "<td>" + genome.numGenes + "</td><td>" + genome.numCDSs + "</td><td>" + genome.numPseudogenes +"</td><td>" + genome.numTRNAs + "</td><td>" + genome.numRRNAs + "</td>";
-            table.append("<tr>" + row_cells + "</tr>");
+            table_body.append("<tr>" + row_cells + "</tr>");
                        
         }
+
+    var newTableObject = document.getElementById("genome_results_table");
+    sorttable.makeSortable(newTableObject);
     }
 }
 
@@ -224,7 +231,7 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
     if (numOrthologues>0){
 
         var header_row = "<tr><th>Orthologue</th><th>Genome</th><th>Organism</th></tr>";
-        target_div.append("<table><thead>" + header_row + "</thead><tbody id=\"orthologues_table\"></tbody></table>");
+        target_div.append("<table id = 'orthologue_results_table'><thead>" + header_row + "</thead><tbody id=\"orthologues_table\"></tbody></table>");
         var table = $('#orthologues_table');
 
          for (var i=0; i<numOrthologues; i++){
@@ -244,6 +251,8 @@ function format_orthologue_data(returned_result, text_status, jqXHR, target_div)
                     format_species_name(returned_result.orthologues[i].organism)+"</td></tr>"); 
             }
          }
+            var newTableObject = document.getElementById("orthologue_results_table");
+            sorttable.makeSortable(newTableObject);
     }
     else{
         target_div.append("<p>No orthologues found.</p>")
@@ -639,10 +648,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
         if (specialStyle)
         {
-            context.lineWidth = 3;
-            context.strokeStyle = "black";
-            context.strokeRect(start_x,start_y,size,height);
-            context.fillStyle = startStyle;
+            // context.lineWidth = 3;
+            // context.strokeStyle = "black";
+            // context.strokeRect(start_x,start_y,size,height);
+            context.fillStyle = "rgb(75,75,75)";
             context.fillRect(start_x,start_y,size,height);
             fontStyle = "bold 10px Helvetica";
 
@@ -702,12 +711,19 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
           
   
         context.strokeStyle = startStyle;
+                if(specialStyle){
+            context.strokeStyle = "rgb(75,75,75)";
+        }
         context.lineWidth = 3;
 
         context.closePath();
         context.stroke();      
          
         context.fillStyle = startStyle;
+
+        if(specialStyle){
+            context.fillStyle = "rgb(75,75,75)";
+        }
         context.fill();
 
         //set canvas covered
@@ -784,7 +800,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     function goToGeneDetailsPage(id){
 
-        window.location.href = "/genedetails/" + id; //slow
+        window.location.href = "/genedetails/" + id; 
        
     }
 
@@ -1122,8 +1138,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                 fillStyle = "rgb(" + red + ", " + green + ", " + blue + ")";
 
-                // alert( red + " "+ green + " "+blue)
-
                 y_coord = (i*100) + 40;
 
                 theModel.genomeList[i].draw(ctx,y_coord, fillStyle, scale);
@@ -1139,14 +1153,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
     document.getElementById("zoom_out_button").addEventListener("click", zoomOut, false);
 
     showScale();
-
-
-
-
-
-
-
-
 
 }
     
