@@ -8,6 +8,7 @@ from pymongo import MongoClient
 import sys
 import os
 import re
+import operator
 
 # Create the Flask app object that will be imported by the wsgi file
 
@@ -331,8 +332,13 @@ def get_genome_info():
             #for each genome, count the number of rRNAs in the features collection
             aResult["numRRNAs"]= features.find({'type': 'rRNA', 'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             raw_results.append(aResult)
+
+            #sort genomes by number of genes
+            sorted_results = sorted(raw_results, key=lambda k: k['numGenes'], reverse = True) 
+
+
    
-        results['results'] = raw_results
+        results['results'] = sorted_results
 
     return jsonify(results)
 

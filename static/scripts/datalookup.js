@@ -1111,18 +1111,18 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
                 unique_colour = Math.round((ctx.measureText(org)).width);
 
-                hash = org.charCodeAt(0) + org.charCodeAt(org.length/2) + org.charCodeAt(org.length-2)
+                red = Math.abs(org.charCodeAt(0) - 60)*5
+                green = Math.abs(org.charCodeAt(org.length/2) - 60)*4
+                blue = Math.abs(org.charCodeAt(org.length-3) - 60)*2 + 50
 
-                red = Math.abs(hash-200)*2 ;
-                green = Math.abs(255-red) ;
-                blue = (red + green)/2;
-
-                red = Math.round((3*red + 170)/4);
-                green = Math.round((3*blue + 190)/4);
-                blue = Math.round((3*green + 220)/4);
+                red = Math.round((3*red)/4);
+                green = Math.round((3*green + 100)/4);
+                blue = Math.round((3*blue + 200)/4);
 
 
                 fillStyle = "rgb(" + red + ", " + green + ", " + blue + ")";
+
+                // alert( red + " "+ green + " "+blue)
 
                 y_coord = (i*100) + 40;
 
