@@ -100,12 +100,12 @@ table tr:nth-child(odd) td {
     background-color: #eeeeee;
 }
 
-/*table.sortable thead {
+table.sortable thead {
     background-color:#eee;
     color:#666666;
     font-weight: bold;
     cursor: default;
-}*/
+}
 
 div#search_results table {
     font-weight: 100;
