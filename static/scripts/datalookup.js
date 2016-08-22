@@ -98,6 +98,7 @@ function format_genome_data(result, text_status, jqXHR, target_div_details, targ
     var table = $('#results_table');
     table.append("<tr><td> ID </td><td>" + result._id + "</td></tr>");
     table.append("<tr><td> Organism </td><td>" + format_species_name(result.organism) + "</td></tr>");
+    table.append("<tr><td> NCBI Entry </td><td><a href=http://www.ncbi.nlm.nih.gov/nuccore/" + result.accession+ ">" + result.accession+ "</a></td></tr>");
     
     var tax = result.taxonomy[0];
     for (var j=1; j< result.taxonomy.length; j++) {

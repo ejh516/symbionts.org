@@ -321,12 +321,13 @@ def get_genome_info():
             if 'plasmids' in result:
                 aResult["numPlasmids"] = len(result["plasmids"])
 
+            # removed 'gene':{"$exists":1} from all of find numGenes, numCDSs and numPseudogenes
             #for each genome, count the number of genes in the features collection
-            aResult["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
+            aResult["numGenes"]= features.find({'type': 'gene','pseudo':{"$exists":0},'genome': result["_id"]}).count()
             #for each genome, count the number of CDSs in the features collection
-            aResult["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': result["_id"]}).count()
+            aResult["numCDSs"]= features.find({'type': 'CDS','pseudo':{"$exists":0},'genome': result["_id"]}).count()
             #for each genome, count the number of pseudogenes in the features collection
-            aResult["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': result["_id"]}).count()
+            aResult["numPseudogenes"]= features.find({'type': 'gene','pseudo':{"$exists":1},'genome': result["_id"]}).count()
             #for each genome, count the number of tRNAs in the features collection
             aResult["numTRNAs"]= features.find({'type': 'tRNA', 'pseudo':{"$exists":0},'genome': result["_id"]}).count()
             #for each genome, count the number of rRNAs in the features collection
@@ -351,7 +352,7 @@ def get_genome_by_ID(genome_id):
 # Get data for given genome    
     result = genome.find_one({"_id": genome_id}, {"sequence":0})
 
-    aResult = {"_id":"Undefined.","organism":"Undefined.","taxonomy":["Undefined."],"plasmids":[], "references": [], "parent_chromosome": "Undefined"}
+    aResult = {"_id":"Undefined.","organism":"Undefined.","taxonomy":["Undefined."],"plasmids":[], "references": [], "parent_chromosome": "Undefined.", "accession": "Undefined."}
 
     if '_id' in result:
         aResult["_id"] = result["_id"]
@@ -363,6 +364,8 @@ def get_genome_by_ID(genome_id):
         aResult["plasmids"] = result["plasmids"]
     if 'parent_chromosome' in result:
         aResult["parent_chromosome"] = result["parent_chromosome"]
+    if 'accessions' in result:
+        aResult["accession"] = result["accessions"][0]    
     if 'references' in result:
         # aResult["references"] =[]
         for ref in result['references']:
@@ -377,10 +380,10 @@ def get_genome_by_ID(genome_id):
                 aRef["pubmed_id"] = ref["pubmed_id"]
             aResult["references"].append(aRef)
 
-
-    aResult["numGenes"]= features.find({'type': 'gene', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
-    aResult["numCDSs"]= features.find({'type': 'CDS', 'gene':{"$exists":1},'pseudo':{"$exists":0},'genome': genome_id}).count()
-    aResult["numPseudogenes"]= features.find({'type': 'gene','gene':{"$exists":1},'pseudo':{"$exists":1},'genome': genome_id}).count()
+    # removed 'gene':{"$exists":1} from all of find numGenes, numCDSs and numPseudogenes
+    aResult["numGenes"]= features.find({'type': 'gene','pseudo':{"$exists":0},'genome': genome_id}).count()
+    aResult["numCDSs"]= features.find({'type': 'CDS','pseudo':{"$exists":0},'genome': genome_id}).count()
+    aResult["numPseudogenes"]= features.find({'type': 'gene','pseudo':{"$exists":1},'genome': genome_id}).count()
     aResult["numTRNAs"]= features.find({'type': 'tRNA','pseudo':{"$exists":0},'genome': genome_id}).count()
     aResult["numRRNAs"]= features.find({'type': 'rRNA','pseudo':{"$exists":0},'genome': genome_id}).count()
 
