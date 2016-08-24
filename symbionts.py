@@ -13,7 +13,8 @@ import operator
 # Create the Flask app object that will be imported by the wsgi file
 
 app = Flask(__name__)
-m_connection = MongoClient(host="c2d2fs0.york.ac.uk")
+# m_connection = MongoClient(host="c2d2fs0.york.ac.uk")
+m_connection = MongoClient(host="localhost")
 db = m_connection.symbiont
 
 #
@@ -142,7 +143,7 @@ def get_gene_by_ID(gene_id):
 
     features = db.genome.features
     genome = db.genome
-    aResult = {"_id": gene_id,"genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "product":"Undefined.", "replicon_type": "Undefined.", "organism": "Undefined.", "location": {"start":"0","end":"0","strand":"Undefined."},"EC_number": "Undefined.","protein_id": "Undefined.","db_xref": ["Undefined."], "function": "Undefined."}
+    aResult = {"_id": gene_id,"genome": "Undefined.","locus_tag": "Undefined.", "gene": "Undefined.", "type": "Undefined", "ecoli_length_ratio": "Undefined.", "product":"Undefined.", "replicon_type": "Undefined.", "organism": "Undefined.", "location": {"start":"0","end":"0","strand":"Undefined."},"EC_number": "Undefined.","protein_id": "Undefined.","db_xref": ["Undefined."], "function": "Undefined."}
 
     result = features.find_one({"_id": oid}, {"translation":0})
 
@@ -155,12 +156,20 @@ def get_gene_by_ID(gene_id):
     if 'gene' in result:
         aResult["gene"] = result['gene']
     if 'location' in result:
+        st = 0
+        end = 0
         if 'start' in result['location']:
             aResult["location"]["start"] = result["location"]["start"]
+            st = float(result["location"]["start"])
         if 'end' in result['location']:
             aResult["location"]["end"] = result["location"]["end"]
+            end = float(result["location"]["end"])
         if 'strand' in result['location']:
             aResult["location"]["strand"] = result["location"]["strand"]
+        if 'ecoli_orthologue_length' in result:
+            aResult["ecoli_length_ratio"] = round((end-st)/(result["ecoli_orthologue_length"]),4)
+        # else:
+        #     aResult["ecoli_length_ratio"] = 1
     if 'product' in result:
         aResult["product"] = result['product']
     if 'EC_number' in result:
@@ -228,7 +237,7 @@ def get_orthologues_by_ID(gene_id):
         elif result["sid"]==gene_id:
             aResult["_id"] = result["qid"]
             aResult["genome"] = result["qgenome"]
-            orth_oid = ObjectId(result["qid"])  
+            orth_oid = ObjectId(result["qid"])
 
         gene_results = features.find_one({"_id": orth_oid}, {"translation":0})
 
@@ -268,7 +277,7 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
 
     for aGene in results:
 
-        aResult = {"_id": "Undefined.","locus_tag": "Undefined.", "name": "Undefined.", "type": "Undefined.", "start": "-1", "end": "-1", "strand":"0"}
+        aResult = {"_id": "Undefined.","locus_tag": "Undefined.", "name": "Undefined.", "type": "Undefined.", "start": "-1", "end": "-1", "strand":"0", "ecoli_length_ratio": "Undefined."}
         if '_id' in aGene:
             aResult["_id"] = str(aGene['_id'])
         if 'locus_tag' in aGene:
@@ -278,12 +287,20 @@ def get_neighbouring_genes(genome_id, start_pos, end_pos):
         if 'type' in aGene:
             aResult["type"] = aGene['type']
         if 'location' in aGene:
+            st = 0;
+            end = 0;
             if 'start' in aGene['location']:
                 aResult["start"] = aGene["location"]["start"]
+                st = float(aGene["location"]["start"])
             if 'end' in aGene['location']:
                 aResult["end"] = aGene["location"]["end"]
+                end = float(aGene["location"]["end"])
             if 'strand' in aGene['location']:
                 aResult["strand"] = aGene["location"]["strand"]
+            if 'ecoli_orthologue_length' in aGene:
+                aResult["ecoli_length_ratio"] = round((end-st)/(aGene["ecoli_orthologue_length"]),4)
+                # aResult["ecoli_length_ratio"] = 0.5
+
 
         geneList.append(aResult)
 
@@ -302,7 +319,8 @@ def get_genome_info():
 
 # Get genome data 
 
-    genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1, 'organism':1, 'taxonomy':1, 'plasmids':1})
+    # genome_cursor = genome.find({'replicon_type':'chromosome'}, {'_ID':1, 'organism':1, 'taxonomy':1, 'plasmids':1})
+    genome_cursor = genome.find({'replicon_type':'chromosome'})
 
 # Have a look through results 
 

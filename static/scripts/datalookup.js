@@ -200,6 +200,7 @@ function format_basic_gene_data(result, text_status, jqXHR, target_div) {
     table.append("<tr><td> Gene Name </td><td>" + result.gene + "</td></tr>");
     table.append("<tr><td> Locus Tag </td><td>" + result.locus_tag + "</td></tr>");
     table.append("<tr><td> Location </td><td> <i>Start:</i> " + result.location.start + " <i>End:</i> " + result.location.end + " <i>Strand:</i> " + result.location.strand + "</td></tr>");
+    table.append("<tr><td> Length relative to orthologue in <i>E.coli</i></td><td>" + result.ecoli_length_ratio + "</td></tr>");
     table.append("<tr><td> Function </td><td>" + result.function + "</td></tr>");
     table.append("<tr><td> Product </td><td>" + result.product + "</td></tr>");
     table.append("<tr><td> EC Number </td><td>" + result.EC_number + "</td></tr>");
@@ -404,11 +405,12 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         this.orientation = null;
     }
 
-    function Gene(id, displayName, start, end, strand) {
+    function Gene(id, displayName, start, end, strand, lengthRatio) {
         this.id = id;
         this.displayName = displayName;  
         this.start = start;
         this.end = end;
+        this.lengthRatio = lengthRatio;
         this.original_start = start;
         this.original_end = end;
         this.length = end-start;
@@ -433,7 +435,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
                     {
                         displayName = genesForDisplay[j].name;
                     }
-                    this.genomeList[i].addGene(genesForDisplay[j]._id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand);
+                    this.genomeList[i].addGene(genesForDisplay[j]._id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand, genesForDisplay[j].ecoli_length_ratio);
+                    // this.genomeList[i].addGene(genesForDisplay[j]._id, displayName, genesForDisplay[j].start, genesForDisplay[j].end, genesForDisplay[j].strand, 99);
+                
+ 
                 }
             }
         }
@@ -486,11 +491,6 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         //first write genome name
         context.fillStyle = "rgb(175,175,175)";
         context.font = "12px Helvetica";
-        // context.fillText(this.organism, 0 ,start_y+50);
-
-         //var start_x = (this.start-(x_offset-5000*scaling))/(10*scaling);
-
-
 
         //then draw all the genes
 
@@ -501,6 +501,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
         var start = "0";
         var end = "0";
         var organism = "???";
+        var lengthR = 0;
         
         
         if (this.orientation == "-1")
@@ -533,6 +534,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
             start = this.genesForDisplay[j].original_start;
             end = this.genesForDisplay[j].original_end;
             organism = this.organism; 
+            lengthR = this.genesForDisplay[j].lengthRatio;
 
           }
         }
@@ -546,10 +548,10 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             geneText = "Gene: " + name;
             posText = "Position: " + start+ " to " +end;
-            genomeText = "Genome: " + genome;
+            lengthRatioText = "E.coli length ratio: " + lengthR;
             organismText = "Organism: " + organism;
 
-            boxLength = (Math.max(geneText.length, posText.length, genomeText.length, organismText.length)*5) + 10;
+            boxLength = (Math.max(geneText.length, posText.length, lengthRatioText.length, organismText.length)*5) + 10;
 
             box_x = box_x - boxLength/2; //reposition start of box according to length of box
 
@@ -566,16 +568,16 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
             context.fillText(geneText, box_x + 10,start_y - 17);
             context.fillText(posText, box_x + 10,start_y+3);
-            context.fillText(genomeText, box_x + 10,start_y+23);           
+            context.fillText(lengthRatioText, box_x + 10,start_y+23);           
             context.fillText(organismText, box_x + 10,start_y+43);
 
         }
     }
 
 
-    Genome.prototype.addGene = function(id, displayName, start, end, strand)
+    Genome.prototype.addGene = function(id, displayName, start, end, strand, lengthRatio)
     {
-        aGene = new Gene(id, displayName, start, end, strand);
+        aGene = new Gene(id, displayName, start, end, strand, lengthRatio);
         aGene.canvasCovered = [0,0,0,0];
         this.genesForDisplay.push(aGene);
     }

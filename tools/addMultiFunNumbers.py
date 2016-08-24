@@ -99,12 +99,16 @@ ecoliOrthologues = orthologues.find({"qgenome":"NC_000913.3"})
 for orth in ecoliOrthologues:
      ecolifeature = features.find_one({"_id": ObjectId(orth["qid"])})
 
+     #new bit...
+     ecoli_length = ecolifeature["location"]["end"] - ecolifeature["location"]["start"]
+     features.update({"_id":ObjectId(orth["sid"])},{"$set":{"ecoli_orthologue_length":ecoli_length}})
+     gene = ecolifeature["gene"]
+     features.update({"_id":ObjectId(orth["sid"])},{"$set":{"ecoli_orthologue_gene":gene}})
+
      if 'MultiFun' in ecolifeature:
           multi = ecolifeature["MultiFun"]
-          #copy over gene name too
-          gene = ecolifeature["gene"]
           features.update({"_id":ObjectId(orth["sid"])},{"$set":{"MultiFun":multi}})
-          features.update({"_id":ObjectId(orth["sid"])},{"$set":{"ecoli_orthologue_gene":gene}})
+          
 
 
 ecoliOrthologues = orthologues.find({"sgenome":"NC_000913.3"})
@@ -112,10 +116,14 @@ ecoliOrthologues = orthologues.find({"sgenome":"NC_000913.3"})
 for orth in ecoliOrthologues:
      ecolifeature = features.find_one({"_id": ObjectId(orth["sid"])})
 
+#new bit...
+     ecoli_length = ecolifeature["location"]["end"] - ecolifeature["location"]["start"]
+     features.update({"_id":ObjectId(orth["qid"])},{"$set":{"ecoli_orthologue_length":ecoli_length}})
+     gene = ecolifeature["gene"]
+     features.update({"_id":ObjectId(orth["qid"])},{"$set":{"MultiFun":multi}})
+
      if 'MultiFun' in ecolifeature:
           multi = ecolifeature["MultiFun"]
-          gene = ecolifeature["gene"]
-          features.update({"_id":ObjectId(orth["qid"])},{"$set":{"MultiFun":multi}})
           features.update({"_id":ObjectId(orth["qid"])},{"$set":{"ecoli_orthologue_gene":gene}})
 
 
