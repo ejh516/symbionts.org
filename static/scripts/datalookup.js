@@ -1157,5 +1157,7 @@ function format_genomic_context_data(result, text_status, jqXHR, target_div, tar
 
     showScale();
 
+    window.setTimeout(draw(),2000); //redraw after 2s in case a genome failed to load. Hmmm.
+
 }
     
