@@ -13,8 +13,8 @@ import operator
 # Create the Flask app object that will be imported by the wsgi file
 
 app = Flask(__name__)
-# m_connection = MongoClient(host="c2d2fs0.york.ac.uk")
-m_connection = MongoClient(host="localhost")
+m_connection = MongoClient(host="c2d2fs0.york.ac.uk")
+# m_connection = MongoClient(host="localhost")
 db = m_connection.symbiont
 
 #

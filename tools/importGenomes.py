@@ -91,6 +91,11 @@ s = toolsFolder+"dumpBlastDB.py  "+dataFolder+ "/symbionts_proteins --split"
 
 # for filename in os.listdir(newFolder):
 # 	print filename
-# 	s = toolsFolder + "addKONumbers.py "+folder + "/" + filename + " "+ toolsFolder "/KONumbers.txt"
-# 	os.system(s)
+# 	s = toolsFolder + "addKONumbers.py "+folder + "/" + filename + " "+ toolsFolder +"/KONumbers.txt"+ "--host "+args.hostcreat
+# 	os.system("python " +s)
+
+STEP 11: add multifun numbers to CDS features
+
+#    s = toolsFolder + "addMultiFunNumbers.py "+toolsFolder +"/uniprot_to_go_mapping.txt " + +toolsFolder +"/go_to_multifun_mapping.txt "+ "--host "+args.host
+#    os.system("python" +s)
 

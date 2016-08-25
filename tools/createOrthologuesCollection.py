@@ -65,7 +65,7 @@ for qid in set(qids):
                q_hit = internal_blast_hits.find({"qid":qid, "sgenome":sgenome}).sort([["evalue",1], ["score",-1]])
                q_best_hit = q_hit[0]
 
-              # check that sgenome is not the same as qgenome
+               # NEW: check that sgenome is not the same as qgenome - could possibly do this when creating internal_blast_hits instead? Although paralogues may be useful at some point.
                if (q_best_hit["qgenome"] != q_best_hit["sgenome"] ): 
 
                    # see if the sid in best hit has the qid as best hit in qid's genome
